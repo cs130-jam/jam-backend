@@ -2,7 +2,7 @@ package com.ucla.jam.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ucla.jam.exceptions.UnknownTokenException;
+import com.ucla.jam.UnknownTokenException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -42,14 +42,14 @@ public class SessionTokenResolver implements HandlerMethodArgumentResolver {
         this.clock = clock;
     }
 
-    public Optional<SessionInfo> fromToken(String token) {
+    public Optional<SessionInfo> fromToken(SessionToken token) {
         try {
             return Optional.of(objectMapper.readValue(
                     Jwts.parserBuilder()
                             .setSigningKey(jwtKey)
                             .setClock(() -> Date.from(clock.instant()))
                             .build()
-                            .parseClaimsJws(token)
+                            .parseClaimsJws(token.getToken())
                             .getBody()
                             .getSubject(),
                     SessionInfo.class));
@@ -59,12 +59,12 @@ public class SessionTokenResolver implements HandlerMethodArgumentResolver {
     }
 
     @SneakyThrows(JsonProcessingException.class)
-    public String toToken(SessionInfo sessionInfo) {
-        return Jwts.builder()
+    public SessionToken toToken(SessionInfo sessionInfo) {
+        return new SessionToken(Jwts.builder()
                 .setSubject(objectMapper.writeValueAsString(sessionInfo))
                 .setExpiration(Date.from(clock.instant().plus(tokenTtl)))
                 .signWith(jwtKey)
-                .compact();
+                .compact());
     }
 
     @Override
@@ -74,7 +74,11 @@ public class SessionTokenResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer container, NativeWebRequest request, WebDataBinderFactory binderFactory) {
+        if (!parameter.getParameterType().isAssignableFrom(SessionInfo.class)) {
+            throw new IllegalArgumentException("@SessionFromHeader parameter must be assignable with SessionInfo object");
+        }
         return Optional.ofNullable(request.getHeader(SESSION_TOKEN_KEY))
+                .map(SessionToken::new)
                 .flatMap(this::fromToken)
                 .orElseThrow(UnknownTokenException::new);
     }

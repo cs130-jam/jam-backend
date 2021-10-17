@@ -1,6 +1,7 @@
 package com.ucla.jam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ucla.jam.resources.UserResource;
 import com.ucla.jam.session.SessionTokenResolver;
 import com.ucla.jam.util.ObjectMapperProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,9 @@ import java.time.Clock;
 import java.util.List;
 
 @Import({
-        SessionTokenResolver.class
+        SessionTokenResolver.class,
+
+        UserResource.class
 })
 public class JamContext {
     @Bean

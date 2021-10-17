@@ -1,4 +1,4 @@
-package com.ucla.jam.exceptions;
+package com.ucla.jam;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,7 +1,8 @@
 package com.ucla.jam.ws;
 
-import com.ucla.jam.exceptions.UnknownTokenException;
+import com.ucla.jam.UnknownTokenException;
 import com.ucla.jam.session.SessionInfo;
+import com.ucla.jam.session.SessionToken;
 import com.ucla.jam.session.SessionTokenResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.socket.TextMessage;
@@ -18,7 +19,7 @@ public class SessionStorageSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        UUID userId = tokenResolver.fromToken(message.getPayload())
+        UUID userId = tokenResolver.fromToken(new SessionToken(message.getPayload()))
                 .map(SessionInfo::getUserId)
                 .orElseThrow(UnknownTokenException::new);
         sessionRepository.insert(userId, session);
