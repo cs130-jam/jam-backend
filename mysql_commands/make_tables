@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS users (
+                                     id CHAR(36) PRIMARY KEY NOT NULL,
+                                     profile TEXT,
+                                     preferences TEXT
+);
+
+CREATE TABLE IF NOT EXISTS chatrooms (
+                                         id CHAR(36) PRIMARY KEY NOT NULL,
+                                         updated BIGINT NOT NULL,
+                                         isDirectMessage BOOLEAN,
+                                         info TEXT,
+                                         INDEX updated_index (updated)
+);
+CREATE TABLE IF NOT EXISTS chatroom_members (
+                                                room CHAR(36) NOT NULL,
+                                                user CHAR(36) NOT NULL,
+                                                PRIMARY KEY (room, user),
+                                                FOREIGN KEY (room) REFERENCES chatrooms(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chats (
+                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                     room CHAR(36) NOT NULL,
+                                     user CHAR(36),
+                                     at BIGINT NOT NULL,
+                                     message TEXT,
+                                     FOREIGN KEY (room) REFERENCES chatrooms(id) ON DELETE CASCADE,
+                                     INDEX at_index (at)
+);
