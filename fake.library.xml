@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.14.0.xsd">
+    <jdbc>
+        <driver>com.mysql.cj.jdbc.Driver</driver>
+        <url>jdbc:mysql://localhost:3306/jam</url>
+        <user>debian-sys-maint</user>
+        <password></password>
+    </jdbc>
+
+    <generator>
+        <name>org.jooq.codegen.JavaGenerator</name>
+
+        <database>
+            <name>org.jooq.meta.mysql.MySQLDatabase</name>
+            <inputSchema>jam</inputSchema>
+            <includes>.*</includes>
+            <excludes></excludes>
+
+            <forcedTypes>
+                <forcedType>
+                    <userType>java.util.UUID</userType>
+                    <converter>com.example.chatconcept.util.UUIDConverter</converter>
+                    <includeExpression>
+                        .*\.users\.id|
+                        .*\.chatrooms\.id|
+                        .*\.chatroom_members\.room|
+                        .*\.chatroom_members\.user|
+                        .*\.chats\.room|
+                        .*\.chats\.user
+                    </includeExpression>
+                    <includeTypes>CHAR\(36\)</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <userType>java.time.Instant</userType>
+                    <converter>com.example.chatconcept.util.InstantConverter</converter>
+                    <includeExpression>
+                        .*\.chatrooms\.updated|
+                        .*\.chats\.at
+                    </includeExpression>
+                    <includeTypes>BIGINT</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <userType>com.example.chatconcept.user.User.Profile</userType>
+                    <converter>com.example.chatconcept.user.User.Profile.Converter</converter>
+                    <includeExpression>.*\.users\.profile</includeExpression>
+                    <includeTypes>TEXT</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <name>BOOLEAN</name>
+                    <includeTypes>(?i:TINYINT\(1\))</includeTypes>
+                </forcedType>
+            </forcedTypes>
+        </database>
+
+        <target>
+            <packageName>generated.jooq</packageName>
+            <directory>./src/main/java</directory>
+        </target>
+    </generator>
+</configuration>
