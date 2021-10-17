@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Import;
 
 @Import({
         AuthenticationContext.class,
-        SessionTokenResolver.class
+        SessionTokenResolver.class,
+        DbUserRepository.class
 })
 public class UserContext {
     @Bean

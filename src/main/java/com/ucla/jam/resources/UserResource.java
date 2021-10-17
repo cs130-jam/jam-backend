@@ -4,14 +4,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
-import com.ucla.jam.session.SessionToken;
-import com.ucla.jam.session.SessionTokenResolver;
+import com.ucla.jam.user.UnknownUserException;
+import com.ucla.jam.user.User;
+import com.ucla.jam.user.User.UserView;
+import com.ucla.jam.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -21,18 +21,17 @@ import java.util.UUID;
 @RestController
 public class UserResource {
 
-    private final SessionTokenResolver tokenResolver;
+    private final UserRepository userRepository;
 
-    @GetMapping(value = "/user/random", produces = APPLICATION_JSON_VALUE)
-    public SessionToken randomUser() {
-        UUID randomUserId = UUID.randomUUID();
-        log.info("Return token for random UUID {}", randomUserId);
-        return tokenResolver.toToken(new SessionInfo(randomUserId));
+    @GetMapping(value = "user", produces = APPLICATION_JSON_VALUE)
+    public User getSessionUser(@SessionFromHeader SessionInfo sessionInfo) {
+        return userRepository.find(sessionInfo.getUserId())
+                .orElseThrow(UnknownUserException::new);
     }
 
-    @PostMapping(value = "/user/test")
-    @ResponseStatus(HttpStatus.OK)
-    public void testUser(@SessionFromHeader SessionInfo sessionInfo) {
-        log.info("Got user with UUID {}", sessionInfo.getUserId());
+    @GetMapping(value = "user/{userId}", produces = APPLICATION_JSON_VALUE)
+    public UserView getUser(@PathVariable UUID userId) {
+        return UserView.ofUser(userRepository.find(userId)
+                .orElseThrow(UnknownUserException::new));
     }
 }

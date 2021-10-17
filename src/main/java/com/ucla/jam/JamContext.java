@@ -1,9 +1,14 @@
 package com.ucla.jam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ucla.jam.chat.ChatContext;
+import com.ucla.jam.resources.ChatResource;
+import com.ucla.jam.resources.ChatroomResource;
 import com.ucla.jam.resources.UserResource;
 import com.ucla.jam.session.SessionTokenResolver;
+import com.ucla.jam.user.UserContext;
 import com.ucla.jam.util.ObjectMapperProvider;
+import com.ucla.jam.ws.WebSocketContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -17,7 +22,12 @@ import java.util.List;
 
 @Import({
         SessionTokenResolver.class,
+        WebSocketContext.class,
+        UserContext.class,
+        ChatContext.class,
 
+        ChatResource.class,
+        ChatroomResource.class,
         UserResource.class
 })
 public class JamContext {
