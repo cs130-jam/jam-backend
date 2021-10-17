@@ -7,7 +7,8 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
 @Import({
         InMemorySessionRepository.class,
-        SessionStorageSocketHandler.class
+        SessionStorageSocketHandler.class,
+        WebSocketManager.class
 })
 public class WebSocketContext {
     @Bean
