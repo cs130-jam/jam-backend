@@ -34,3 +34,4 @@ build/
 
 application.properties
 jooq-codegen.xml
+/src/main/java/generated
