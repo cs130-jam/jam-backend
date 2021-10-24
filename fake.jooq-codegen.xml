@@ -19,9 +19,17 @@
             <forcedTypes>
                 <forcedType>
                     <userType>java.util.UUID</userType>
-                    <converter>com.example.chatconcept.util.UUIDConverter</converter>
+                    <converter>com.ucla.jam.util.jooq.UUIDConverter</converter>
                     <includeExpression>
                         .*\.users\.id|
+                        .*\.internal_credentials\.userId|
+                        .*\.friends\.userA|
+                        .*\.friends\.userB|
+                        .*\.friend_requests\.source|
+                        .*\.friend_requests\.target|
+                        .*\.chatroom_invites\.room|
+                        .*\.chatroom_invites\.source|
+                        .*\.chatroom_invites\.target|
                         .*\.chatrooms\.id|
                         .*\.chatroom_members\.room|
                         .*\.chatroom_members\.user|
@@ -32,7 +40,7 @@
                 </forcedType>
                 <forcedType>
                     <userType>java.time.Instant</userType>
-                    <converter>com.example.chatconcept.util.InstantConverter</converter>
+                    <converter>com.ucla.jam.util.jooq.InstantConverter</converter>
                     <includeExpression>
                         .*\.chatrooms\.updated|
                         .*\.chats\.at
@@ -40,9 +48,21 @@
                     <includeTypes>BIGINT</includeTypes>
                 </forcedType>
                 <forcedType>
-                    <userType>com.example.chatconcept.user.User.Profile</userType>
-                    <converter>com.example.chatconcept.user.User.Profile.Converter</converter>
+                    <userType>com.ucla.jam.user.User.Profile</userType>
+                    <converter>com.ucla.jam.user.User.Profile.Converter</converter>
                     <includeExpression>.*\.users\.profile</includeExpression>
+                    <includeTypes>TEXT</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <userType>com.ucla.jam.user.User.Preferences</userType>
+                    <converter>com.ucla.jam.user.User.Preferences.Converter</converter>
+                    <includeExpression>.*\.users\.preferences</includeExpression>
+                    <includeTypes>TEXT</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <userType>com.ucla.jam.chat.Chatroom.Info</userType>
+                    <converter>com.ucla.jam.chat.Chatroom.Info.Converter</converter>
+                    <includeExpression>.*\.chatrooms\.info</includeExpression>
                     <includeTypes>TEXT</includeTypes>
                 </forcedType>
                 <forcedType>
