@@ -22,4 +22,11 @@ public class AggregatedCredentialsRepository implements CredentialsRepository {
         Optional.ofNullable(repositoryMap.get(credentials.getKind()))
                 .ifPresent(repository -> repository.addUser(id, credentials));
     }
+
+    @Override
+    public boolean isUserExist(Credentials partialCredentials) {
+        return Optional.ofNullable(repositoryMap.get(partialCredentials.getKind()))
+                .map(repository -> repository.isUserExist(partialCredentials))
+                .orElse(false);
+    }
 }

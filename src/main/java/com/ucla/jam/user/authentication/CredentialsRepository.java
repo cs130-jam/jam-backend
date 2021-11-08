@@ -6,4 +6,5 @@ import java.util.UUID;
 public interface CredentialsRepository {
     Optional<UUID> userForCredentials(Credentials credentials);
     void addUser(UUID id, Credentials credentials);
+    boolean isUserExist(Credentials partialCredentials);
 }
