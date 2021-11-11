@@ -2,6 +2,7 @@ package com.ucla.jam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.ChatContext;
+import com.ucla.jam.resources.ArtistResource;
 import com.ucla.jam.resources.AuthenticationResource;
 import com.ucla.jam.resources.ChatResource;
 import com.ucla.jam.resources.ChatroomResource;
@@ -32,7 +33,8 @@ import java.util.List;
         ChatroomResource.class,
         UserResource.class,
         TestResource.class,
-        AuthenticationResource.class
+        AuthenticationResource.class,
+        ArtistResource.class
 })
 public class JamContext {
     @Bean
