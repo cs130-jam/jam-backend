@@ -36,7 +36,7 @@ public class UserResource {
                 .orElseThrow(UnknownUserException::new));
     }
 
-    @GetMapping(value = "/api/user/choices/instruments", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/user/choices/instruments", produces = APPLICATION_JSON_VALUE)
     public List<String> instruments() {
         return Arrays.stream(User.Instrument.values())
                 .sorted((t1, t2) -> t2.usageFrequency - t1.usageFrequency) // descending order

@@ -30,7 +30,13 @@ public class AuthenticationManager {
         return credentialsRepository.isUserExist(partialCredentials);
     }
 
-    public InternalCredentials internal(String username, String password) {
+    public InternalCredentials internal(String username, String password) throws InvalidSignupException {
+        if (username.length() == 0) {
+            throw new InvalidSignupException("Username may not be empty");
+        }
+        if (password.length() < 8) {
+            throw new InvalidSignupException("Password may not be less than 8 characters");
+        }
         return new InternalCredentials(username, InternalCredentials.hashPassword(password, passwordSalt));
     }
 }
