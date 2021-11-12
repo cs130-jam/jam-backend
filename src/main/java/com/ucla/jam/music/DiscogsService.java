@@ -4,12 +4,12 @@ import static java.util.stream.Collectors.toList;
 
 import com.ucla.jam.music.responses.SearchResponse;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
+import com.ucla.jam.resources.ArtistResource;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -21,20 +21,23 @@ public class DiscogsService {
 //    private final int globalMaxCount;
 //    private final int defaultCount;
 
-    public Future<List<ArtistView>> artistSearch(String artist, int page) {
-        CompletableFuture<List<ArtistView>> future = new CompletableFuture<>();
+    public Future<ArtistResource.QueryResponse> artistSearch(String artist, int page) {
+        CompletableFuture<ArtistResource.QueryResponse> future = new CompletableFuture<>();
         new SearchRequest(artist, ARTIST_SEARCH_TYPE)
                 .withPage(page)
                 .doOnError(future::completeExceptionally)
                 .onErrorResume(error -> Mono.empty())
-                .subscribe(response -> future.complete(response.getResults()
-                        .stream()
-                        .map(ArtistView::ofResult)
-                        .collect(toList())));
+                .subscribe(response -> future.complete(new ArtistResource.QueryResponse(
+                        page,
+                        response.getPagination().getPages(),
+                        response.getResults()
+                                .stream()
+                                .map(ArtistView::ofResult)
+                                .collect(toList()))));
         return future;
     }
 
-    public Future<List<ArtistView>> artistSearch(String artist) {
+    public Future<ArtistResource.QueryResponse> artistSearch(String artist) {
         return artistSearch(artist, 1);
 //        return artistSearch(artist, defaultCount);
     }

@@ -2,6 +2,7 @@ package com.ucla.jam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.ChatContext;
+import com.ucla.jam.music.MusicContext;
 import com.ucla.jam.resources.ArtistResource;
 import com.ucla.jam.resources.AuthenticationResource;
 import com.ucla.jam.resources.ChatResource;
@@ -28,6 +29,7 @@ import java.util.List;
         WebSocketContext.class,
         UserContext.class,
         ChatContext.class,
+        MusicContext.class,
 
         ChatResource.class,
         ChatroomResource.class,

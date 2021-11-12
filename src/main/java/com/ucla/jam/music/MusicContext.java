@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 import javax.net.ssl.SSLException;
 
-public class MusicContent {
+public class MusicContext {
 
     @Bean
     @SneakyThrows(SSLException.class)

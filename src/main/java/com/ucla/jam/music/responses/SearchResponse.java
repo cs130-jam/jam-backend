@@ -45,7 +45,7 @@ public class SearchResponse {
         String id;
         String name;
         String thumb;
-        String url;
+        String path;
 
         public static ArtistView ofResult(Result result) {
             return new ArtistView(result.getId(), result.getTitle(), result.getThumb(), result.getResource_url());

@@ -6,6 +6,7 @@ import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.SearchException;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +23,7 @@ public class ArtistResource {
     private final DiscogsService discogsService;
 
     @GetMapping(value = "/artist/search", produces = APPLICATION_JSON_VALUE)
-    public List<ArtistView> search(@RequestParam String artist, @RequestParam(required = false) Integer page) {
+    public QueryResponse search(@RequestParam String artist, @RequestParam(required = false) Integer page) {
         try {
             if (page == null) {
                 return discogsService.artistSearch(artist).get();
@@ -37,4 +38,12 @@ public class ArtistResource {
             throw new SearchException();
         }
     }
+
+    @Value
+    public static class QueryResponse {
+        int page;
+        int totalPages;
+        List<ArtistView> responses;
+    }
+
 }
