@@ -1,13 +1,4 @@
-cd Rec_service
+cd Rec_service || exit
 
 source venv/bin/activate
-if ! command -v python3 &> /dev/null
-then
-    python reco.py
-
-else
-    python3 reco.py
-fi
-
-
-
+python reco.py
