@@ -1,3 +1,5 @@
+USE jam;
+
 DROP TABLE IF EXISTS chats;
 DROP TABLE IF EXISTS  chatroom_invites;
 DROP TABLE IF EXISTS chatroom_members;
