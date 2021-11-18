@@ -31,16 +31,16 @@ def form_example():
 def json_example():
     page_index = 0
 
-    dfsql=pd.read_sql_query("SELECT uid, interests FROM user_interests ",connection)
-    dfsql['interests'] = dfsql['interests'].apply(lambda x:json.loads(x))
-    tmp = pd.DataFrame(columns = ['uid'] + genres)
+    dfsql = pd.read_sql_query("SELECT uid, interests FROM user_interests ", connection)
+    dfsql['interests'] = dfsql['interests'].apply(lambda x: json.loads(x))
+    tmp = pd.DataFrame(columns=['uid'] + genres)
     l = dfsql['interests'].tolist()
     tmp = tmp.append(l, ignore_index=True)
-    knn = NearestNeighbors(n_neighbors = dfsql.shape[0]).fit(tmp[genres])
+    knn = NearestNeighbors(n_neighbors=dfsql.shape[0]).fit(tmp[genres])
     d = request.get_json()
-    e = pd.DataFrame(columns = genres)
+    e = pd.DataFrame(columns=genres)
     e = e.append(d, ignore_index=True)
-    e = e.drop(columns = ['uid'])
+    e = e.drop(columns=['uid'])
     e = e.fillna(0)
     e = e.div(e.sum(axis=1), axis=0)
     e['uid'] = d['uid']
@@ -54,5 +54,4 @@ def json_example():
 
 
 if __name__ == '__main__':
-    # run app in debug mode on port 5000
-    app.run(host='0.0.0.0', port=105)
+    app.run(host='0.0.0.0', port=5000)
