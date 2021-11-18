@@ -1,4 +1,4 @@
-cd Rec_service || exit
+cd Rec_service
 if ! command -v python3 &> /dev/null
 then
     python -m venv venv
