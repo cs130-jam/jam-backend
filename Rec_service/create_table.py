@@ -3,14 +3,16 @@ import pymysql
 import pandas as pd
 import numpy as np
 from get_db_info import getProps
-from genres import genres
+from constants import genres, db_name
 
 props = getProps()
 username = props.username
 password = props.password
 
-connection=pymysql.connect(host='localhost', port=int(3306), user=username, passwd=password, db='employee_management_system')
+connection=pymysql.connect(host='localhost', port=int(3306), user=username, passwd=password)
 mycursor = connection.cursor()
+mycursor.execute("CREATE DATABASE IF NOT EXISTS " + db_name)
+mycursor.execute("USE " + db_name)
 mycursor.execute("CREATE TABLE IF NOT EXISTS user_interests (uid char(36), interests text)")
 # In[ ]:
 df = pd.DataFrame(np.random.randint(0,20,size=(100, 584)), columns= genres)

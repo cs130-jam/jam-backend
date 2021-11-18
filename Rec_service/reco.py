@@ -4,14 +4,13 @@ import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from flask import Flask, request, jsonify
 from get_db_info import getProps
-from genres import genres
+from constants import genres, db_name
 
 props = getProps()
 username = props.username
 password = props.password
 
-connection = pymysql.connect(host='localhost', port=int(3306), user=username, passwd=password, db='employee_management_system')
-mycursor = connection.cursor()
+connection = pymysql.connect(host='localhost', port=int(3306), user=username, passwd=password, db=db_name)
 
 # create the Flask app
 app = Flask(__name__)
