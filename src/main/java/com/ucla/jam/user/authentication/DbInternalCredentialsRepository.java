@@ -32,6 +32,15 @@ public class DbInternalCredentialsRepository implements CredentialsRepository {
                 .execute();
     }
 
+    @Override
+    public boolean isUserExist(Credentials partialCredentials) {
+        InternalCredentials credentials = (InternalCredentials) partialCredentials;
+        return context.selectFrom(INTERNAL_CREDENTIALS)
+                .where(INTERNAL_CREDENTIALS.USERNAME.eq(credentials.getUsername()))
+                .fetchOptional()
+                .isPresent();
+    }
+
     private InternalCredentialsRecord toRecord(UUID id, InternalCredentials credentials) {
         return new InternalCredentialsRecord(credentials.getUsername(), id, credentials.getPasswordHash());
     }
