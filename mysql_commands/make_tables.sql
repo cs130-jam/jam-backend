@@ -1,7 +1,6 @@
-USE jam;
-
 DROP TABLE IF EXISTS chats;
-DROP TABLE IF EXISTS  chatroom_invites;
+DROP TABLE IF EXISTS visited_recs;
+DROP TABLE IF EXISTS chatroom_invites;
 DROP TABLE IF EXISTS chatroom_members;
 DROP TABLE IF EXISTS chatrooms;
 DROP TABLE IF EXISTS friends;
@@ -72,4 +71,9 @@ CREATE TABLE chats (
     message TEXT,
     FOREIGN KEY (room) REFERENCES chatrooms(id) ON DELETE CASCADE,
     INDEX at_index (at)
+);
+
+CREATE TABLE visited_recs (
+    userId CHAR(36) NOT NULL,
+    targetId CHAR(36) NOT NULL
 );
