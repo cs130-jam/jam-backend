@@ -27,7 +27,11 @@ public class MusicContext {
     }
 
     @Bean
-    public DiscogsService discogsService(DiscogsWebClientProvider clientProvider) {
-        return new DiscogsService(clientProvider);
+    public DiscogsService discogsService(
+            DiscogsWebClientProvider clientProvider,
+            @Value("${discogs.api.max.pagination.items}") int maxItems,
+            @Value("${discogs.api.max.simultaneous.requests}") int batchSize
+    ) {
+        return new DiscogsService(clientProvider, maxItems, batchSize);
     }
 }

@@ -6,24 +6,14 @@ import lombok.Value;
 import java.util.List;
 
 @Value
-public class SearchResponse {
+public class SearchResponse implements PaginatedResponse<SearchResponse.Result> {
 
     Pagination pagination;
     List<Result> results;
 
-    @Value
-    public static class Pagination {
-        int page;
-        int per_page;
-        int pages;
-        int items;
-        Urls urls;
-    }
-
-    @Value
-    public static class Urls {
-        String last;
-        String next;
+    @Override
+    public List<Result> getItems() {
+        return results;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -47,8 +37,12 @@ public class SearchResponse {
         String thumb;
         String path;
 
-        public static ArtistView ofResult(Result result) {
-            return new ArtistView(result.getId(), result.getTitle(), result.getThumb(), result.getResource_url());
+        public static ArtistView ofResult(Result result, String baseUrl) {
+            String trimmedUrl = result.getResource_url().replace(baseUrl, "");
+            if (trimmedUrl.charAt(0) == '/') {
+                trimmedUrl = trimmedUrl.substring(1);
+            }
+            return new ArtistView(result.getId(), result.getTitle(), result.getThumb(), trimmedUrl);
         }
     }
 }
