@@ -5,6 +5,7 @@ import com.ucla.jam.music.responses.SearchResponse.ArtistView;
 import com.ucla.jam.resources.ArtistResource;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @RequiredArgsConstructor
 public class DiscogsService {
 
@@ -103,13 +105,13 @@ public class DiscogsService {
                 .doOnError(handler::failed)
                 .onErrorResume(error -> Mono.empty())
                 .subscribe(response -> {
-                    int perPage = response.getPagination().getPer_page();
                     List<I> combinedResults = Stream.concat(
                                     currentItems.stream(),
                                     response.getItems()
                                             .stream()
                                             .limit(countRemaining))
                             .collect(toList());
+                    int perPage = combinedResults.size();
                     if (countRemaining <= perPage || page >= response.getPagination().getPages()) {
                         handler.completed(combinedResults);
                     } else {
