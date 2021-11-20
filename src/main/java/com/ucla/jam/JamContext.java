@@ -2,13 +2,9 @@ package com.ucla.jam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.ChatContext;
+import com.ucla.jam.friends.FriendContext;
 import com.ucla.jam.music.MusicContext;
-import com.ucla.jam.resources.ArtistResource;
-import com.ucla.jam.resources.AuthenticationResource;
-import com.ucla.jam.resources.ChatResource;
-import com.ucla.jam.resources.ChatroomResource;
-import com.ucla.jam.resources.TestResource;
-import com.ucla.jam.resources.UserResource;
+import com.ucla.jam.resources.*;
 import com.ucla.jam.session.SessionTokenResolver;
 import com.ucla.jam.user.UserContext;
 import com.ucla.jam.util.ObjectMapperProvider;
@@ -30,13 +26,15 @@ import java.util.List;
         UserContext.class,
         ChatContext.class,
         MusicContext.class,
+        FriendContext.class,
 
         ChatResource.class,
         ChatroomResource.class,
         UserResource.class,
         TestResource.class,
         AuthenticationResource.class,
-        ArtistResource.class
+        ArtistResource.class,
+        FriendResource.class
 })
 public class JamContext {
     @Bean
