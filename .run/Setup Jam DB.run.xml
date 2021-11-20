@@ -1,8 +1,17 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Create Tables" type="DatabaseScript">
-    <script-file value="$PROJECT_DIR$/mysql_commands/make_tables.sql" />
-    <script-mode>FILE</script-mode>
-    <data-source id="241fc34e-1637-4407-9bc0-8a732f788509" namespace="schema/&quot;jam&quot;" />
-    <method v="2" />
+  <configuration default="false" name="Setup Jam DB" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.jooq.codegen.GenerationTool" />
+    <module name="jam" />
+    <option name="PROGRAM_PARAMETERS" value="jooq-codegen.xml" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.jooq.codegen.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Create Tables" run_configuration_type="DatabaseScript" />
+    </method>
   </configuration>
 </component>

@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Create Tables" type="DatabaseScript">
+    <script-file value="$PROJECT_DIR$/mysql_commands/make_tables.sql" />
+    <script-mode>FILE</script-mode>
+    <data-source id="241fc34e-1637-4407-9bc0-8a732f788509" namespace="schema/&quot;jam&quot;" />
+    <method v="2" />
+  </configuration>
+</component>
