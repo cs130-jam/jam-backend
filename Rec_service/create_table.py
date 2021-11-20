@@ -13,7 +13,7 @@ connection=pymysql.connect(host='localhost', port=int(3306), user=username, pass
 mycursor = connection.cursor()
 mycursor.execute("CREATE DATABASE IF NOT EXISTS " + db_name)
 mycursor.execute("USE " + db_name)
-mycursor.execute("CREATE TABLE IF NOT EXISTS user_interests (uid char(36), interests text)")
+mycursor.execute("CREATE TABLE IF NOT EXISTS user_interests (uid char(36) PRIMARY_KEY, interests text)")
 # In[ ]:
 df = pd.DataFrame(np.random.randint(0,20,size=(100, 584)), columns= genres)
 df = df.div(df.sum(axis=1), axis=0)
