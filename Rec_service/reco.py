@@ -36,12 +36,12 @@ class GetMatchesResponse:
 def insert_user():
     request_body = InsertRequestBody(**request.get_json())
     total_genre_count = sum(request_body.genres.values())
-    filled_genres = defaultdict(request_body.genres, 0)
+    filled_genres = defaultdict(int, request_body.genres)
     normalized_genres = {genre: filled_genres[genre] / total_genre_count for genre in genres}
     sql = "INSERT INTO user_interests (uid, interests) VALUES (%s, %s) ON DUPLICATE KEY UPDATE interests=%s"
     genres_json = json.dumps(normalized_genres)
     with connection.cursor() as cursor:
-        cursor.execute(sql, (genres_json, request_body.uid, genres_json))
+        cursor.execute(sql, (request_body.uid, genres_json, genres_json))
 
     connection.commit()
     return '', 204

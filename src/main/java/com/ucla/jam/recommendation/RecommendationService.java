@@ -30,6 +30,7 @@ import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static lombok.AccessLevel.PRIVATE;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,18 +59,18 @@ public class RecommendationService {
                 .thenApply(maps -> maps.stream()
                         .flatMap(map -> map.entrySet().stream())
                         .collect(Collectors.toMap(Entry::getKey, Entry::getValue, Integer::sum)))
-                .thenAccept(styleMap -> {
-                    webClientProvider.get()
-                            .put()
-                            .uri("insert_user")
-                            .body(Mono.just(new InsertRequestBody(userId, styleMap)), InsertRequestBody.class)
-                            .retrieve()
-                            .onStatus(status -> !HttpStatus.NO_CONTENT.equals(status),
-                                    clientResponse -> {
-                                        log.error("Failed to insert user to rec service, {}", clientResponse);
-                                        return Mono.empty();
-                                    });
-                });
+                .thenAccept(styleMap -> webClientProvider.get()
+                        .post()
+                        .uri("insert_user")
+                        .contentType(APPLICATION_JSON)
+                        .body(Mono.just(new InsertRequestBody(userId, styleMap)), InsertRequestBody.class)
+                        .retrieve()
+                        .onStatus(status -> !HttpStatus.NO_CONTENT.equals(status), clientResponse -> {
+                            log.error("Failed to insert user to rec service, {}", clientResponse);
+                            return Mono.empty();
+                        })
+                        .toBodilessEntity()
+                        .subscribe(entity -> log.info("Got status code = {}", entity.getStatusCode())));
     }
 
     public void markVisited(UUID sourceUser, UUID targetUser) {
@@ -140,9 +141,6 @@ public class RecommendationService {
 
         @Override
         public List<UUID> getResult() {
-            if (!isFinished()) {
-                throw new NoRecommendationFoundException();
-            }
             return List.of(userId);
         }
 

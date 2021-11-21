@@ -15,12 +15,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -29,7 +31,7 @@ public class DiscogsService {
 
     private static final String ARTIST_SEARCH_TYPE = "artist";
     private final DiscogsWebClientProvider webClientProvider;
-    private final int globalMaxCount;
+    private final int maxItemCount;
     private final int batchSize;
 
     public Future<ArtistResource.QueryResponse> artistSearch(String artist, int page) {
@@ -56,11 +58,14 @@ public class DiscogsService {
         CompletableFuture<Map<Style, Integer>> future = new CompletableFuture<>();
         Pagination.accumulatingPaginatedRequest(
                 new ArtistReleasesRequest(artistUrl),
-                globalMaxCount,
+                maxItemCount,
                 new ResultHandler<>() {
                     @Override
                     public void completed(List<ArtistReleaseResponse.Release> releases) {
-                        getStyles(releases, future);
+                        getStyles(releases.stream()
+                                .filter(release -> release.getType() == MASTER)
+                                .collect(toList()),
+                                future);
                     }
 
                     @Override
@@ -72,18 +77,22 @@ public class DiscogsService {
     }
 
     private void getStyles(List<ArtistReleaseResponse.Release> releases, CompletableFuture<Map<Style, Integer>> future) {
-        Flux.fromIterable(releases)
+        Collections.shuffle(releases);
+        Flux.fromIterable(releases.subList(0, batchSize))
                 .flatMapSequential(release -> webClientProvider.get()
                         .get()
                         .uri(release.getResource_url())
                         .retrieve()
                         .bodyToMono(MasterResourceResponse.class)
-                        .onErrorResume(error -> Mono.empty()),
-                        batchSize)
+                        .onErrorResume(error -> {
+                            log.error("Failed to fetch master resource, {}", error.getMessage());
+                            return Mono.empty();
+                        }))
                 .collectList()
                 .subscribe(masters -> {
                     Map<Style, Integer> stylesMap = new HashMap<>();
                     masters.stream()
+                            .filter(master -> master.getStyles() != null)
                             .flatMap(master -> master.getStyles().stream())
                             .forEach(style -> stylesMap.put(style, stylesMap.getOrDefault(style, 0) + 1));
                     future.complete(stylesMap);
@@ -102,6 +111,7 @@ public class DiscogsService {
                             .queryParam("q", query)
                             .queryParam("type", type)
                             .queryParam("page", page)
+                            .queryParam("per_page", 100)
                             .build()
                             .toUriString())
                     .retrieve()
@@ -119,6 +129,7 @@ public class DiscogsService {
                     .uri(UriComponentsBuilder.fromUriString(artistUrl)
                             .pathSegment("releases")
                             .queryParam("page", page)
+                            .queryParam("per_page", 100)
                             .build()
                             .toUriString())
                     .retrieve()

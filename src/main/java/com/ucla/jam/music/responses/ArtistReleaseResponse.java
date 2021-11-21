@@ -24,7 +24,7 @@ public class ArtistReleaseResponse implements PaginatedResponse<ArtistReleaseRes
     public static class Release {
         String artist;
         String resource_url;
-        String type;
+        Type type;
     }
 
     @RequiredArgsConstructor

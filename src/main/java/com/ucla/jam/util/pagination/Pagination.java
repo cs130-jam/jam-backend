@@ -1,6 +1,7 @@
 package com.ucla.jam.util.pagination;
 
 import com.ucla.jam.music.ResultHandler;
+import com.ucla.jam.recommendation.NoRecommendationFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 import reactor.core.publisher.Mono;
@@ -18,6 +19,13 @@ public class Pagination {
             ResultHandler<List<I>> handler
     ) {
         paginatedRequest(request, Accumulator.withLimit(countRemaining), 1, handler);
+    }
+
+    public static <I, T extends PaginatedResponse<I>> void accumulatingPaginatedRequest(
+            PaginatedRequest<I, T> request,
+            ResultHandler<List<I>> handler
+    ) {
+        paginatedRequest(request, Accumulator.withoutLimit(), 1, handler);
     }
 
     public static <I, T extends PaginatedResponse<I>> void paginatedRequest(
@@ -38,9 +46,14 @@ public class Pagination {
                 .doOnError(handler::failed)
                 .onErrorResume(error -> Mono.empty())
                 .subscribe(response -> {
+                    if (response.getPagination().getTotalPages() < page) {
+                        throw new NoRecommendationFoundException();
+                    }
                     PageHandler<I> nextHandler = pageHandler.handle(response.getItems());
-                    if (page >= response.getPagination().getTotalPages() || nextHandler.isFinished()) {
+                    if (nextHandler.isFinished()) {
                         handler.completed(nextHandler.getResult());
+                    } else if (page == response.getPagination().getTotalPages()) {
+                        throw new NoRecommendationFoundException();
                     } else {
                         paginatedRequest(request, nextHandler, page + 1, handler);
                     }
@@ -70,7 +83,7 @@ public class Pagination {
 
         @Override
         public PageHandler<I> handle(List<I> page) {
-            int countRemaining = countLimit - items.size();
+            int countRemaining = countLimit == -1 ? page.size() : countLimit - items.size();
             return withItems(Stream.concat(
                     items.stream(),
                             page.stream().limit(countRemaining))

@@ -11,7 +11,7 @@ import java.util.UUID;
 public class GetRecommendationsResponse implements PaginationContext, PaginatedResponse<UUID> {
 
     int totalPages;
-    List<UUID> recommendations;
+    List<UUID> users;
 
     @Override
     public PaginationContext getPagination() {
@@ -20,6 +20,6 @@ public class GetRecommendationsResponse implements PaginationContext, PaginatedR
 
     @Override
     public List<UUID> getItems() {
-        return recommendations;
+        return users;
     }
 }

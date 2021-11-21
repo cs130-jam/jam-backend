@@ -18,9 +18,6 @@ public class RecommendationWebClientProvider {
     public WebClient get() {
         return WebClient.builder()
                 .baseUrl(baseUrl)
-                .defaultHeaders(httpHeaders -> {
-                    httpHeaders.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
-                })
                 .build();
     }
 }
