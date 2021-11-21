@@ -1,8 +1,13 @@
 package com.ucla.jam.music;
 
-import com.ucla.jam.music.responses.*;
+import com.ucla.jam.music.responses.ArtistReleaseResponse;
+import com.ucla.jam.music.responses.MasterResourceResponse;
+import com.ucla.jam.music.responses.SearchResponse;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
+import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.resources.ArtistResource;
+import com.ucla.jam.util.pagination.Pagination;
+import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -48,9 +52,9 @@ public class DiscogsService {
         return artistSearch(artist, 1);
     }
 
-    public Future<Map<Style, Integer>> artistStyles(String artistUrl) {
+    public CompletableFuture<Map<Style, Integer>> artistStyles(String artistUrl) {
         CompletableFuture<Map<Style, Integer>> future = new CompletableFuture<>();
-        paginatedRequest(
+        Pagination.accumulatingPaginatedRequest(
                 new ArtistReleasesRequest(artistUrl),
                 globalMaxCount,
                 new ResultHandler<>() {
@@ -84,44 +88,6 @@ public class DiscogsService {
                             .forEach(style -> stylesMap.put(style, stylesMap.getOrDefault(style, 0) + 1));
                     future.complete(stylesMap);
                 });
-    }
-
-    private static <I, T extends PaginatedResponse<I>> void paginatedRequest(
-            PaginatedRequest<I, T> request,
-            int countRemaining,
-            ResultHandler<List<I>> handler
-    ) {
-        paginatedRequest(request, countRemaining, 1, List.of(), handler);
-    }
-
-    private static <I, T extends PaginatedResponse<I>> void paginatedRequest(
-            PaginatedRequest<I, T> request,
-            int countRemaining,
-            int page,
-            List<I> currentItems,
-            ResultHandler<List<I>> handler
-    ) {
-        request.withPage(page)
-                .doOnError(handler::failed)
-                .onErrorResume(error -> Mono.empty())
-                .subscribe(response -> {
-                    List<I> combinedResults = Stream.concat(
-                                    currentItems.stream(),
-                                    response.getItems()
-                                            .stream()
-                                            .limit(countRemaining))
-                            .collect(toList());
-                    int perPage = combinedResults.size();
-                    if (countRemaining <= perPage || page >= response.getPagination().getPages()) {
-                        handler.completed(combinedResults);
-                    } else {
-                        paginatedRequest(request, countRemaining - perPage, page + 1, combinedResults, handler);
-                    }
-                });
-    }
-
-    private interface PaginatedRequest<I, T extends PaginatedResponse<I>> {
-        Mono<T> withPage(int page);
     }
 
     @Value

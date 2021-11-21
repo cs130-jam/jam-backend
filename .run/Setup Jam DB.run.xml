@@ -10,7 +10,6 @@
       </pattern>
     </extension>
     <method v="2">
-      <option name="Make" enabled="true" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="Create Tables" run_configuration_type="DatabaseScript" />
     </method>
   </configuration>

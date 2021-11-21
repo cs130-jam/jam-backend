@@ -75,5 +75,6 @@ CREATE TABLE chats (
 
 CREATE TABLE visited_recs (
     userId CHAR(36) NOT NULL,
-    targetId CHAR(36) NOT NULL
+    targetId CHAR(36) NOT NULL,
+    PRIMARY KEY (userId, targetId)
 );

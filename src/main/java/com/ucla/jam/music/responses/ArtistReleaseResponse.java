@@ -2,6 +2,7 @@ package com.ucla.jam.music.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.ucla.jam.util.pagination.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @Value
 public class ArtistReleaseResponse implements PaginatedResponse<ArtistReleaseResponse.Release> {
 
-    Pagination pagination;
+    DiscogsPagination pagination;
     List<Release> releases;
 
     @Override
