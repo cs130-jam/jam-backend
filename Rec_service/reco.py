@@ -1,6 +1,10 @@
+from __future__ import annotations
 import json
 import pymysql
 import pandas as pd
+from math import ceil
+from collections import defaultdict
+from dataclasses import dataclass
 from sklearn.neighbors import NearestNeighbors
 from flask import Flask, request, jsonify
 from get_db_info import getProps
@@ -16,40 +20,63 @@ connection = pymysql.connect(host='localhost', port=int(3306), user=username, pa
 app = Flask(__name__)
 
 
-@app.route('/query-example')
-def query_example():
-    return 'Query String Example'
+@dataclass
+class InsertRequestBody:
+    uid: str
+    genres: dict[str, int]
 
 
-@app.route('/form-example')
-def form_example():
-    return 'Form Data Example'
+@dataclass
+class GetMatchesResponse:
+    totalPages: int
+    users: list[str]
 
 
-@app.route('/json-example', methods=['POST'])
-def json_example():
-    page_index = 0
+@app.route('/insert_user', methods=['POST'])
+def insert_user():
+    request_body = InsertRequestBody(**request.get_json())
+    total_genre_count = sum(request_body.genres.values())
+    filled_genres = defaultdict(request_body.genres, 0)
+    normalized_genres = {genre: filled_genres[genre] / total_genre_count for genre in genres}
+    sql = "INSERT INTO user_interests (uid, interests) VALUES (%s, %s) ON DUPLICATE KEY UPDATE interests=%s"
+    genres_json = json.dumps(normalized_genres)
+    with connection.cursor() as cursor:
+        cursor.execute(sql, (genres_json, request_body.uid, genres_json))
 
-    dfsql = pd.read_sql_query("SELECT uid, interests FROM user_interests ", connection)
-    dfsql['interests'] = dfsql['interests'].apply(lambda x: json.loads(x))
-    tmp = pd.DataFrame(columns=['uid'] + genres)
-    l = dfsql['interests'].tolist()
-    tmp = tmp.append(l, ignore_index=True)
-    knn = NearestNeighbors(n_neighbors=dfsql.shape[0]).fit(tmp[genres])
-    d = request.get_json()
-    e = pd.DataFrame(columns=genres)
-    e = e.append(d, ignore_index=True)
-    e = e.drop(columns=['uid'])
-    e = e.fillna(0)
-    e = e.div(e.sum(axis=1), axis=0)
-    e['uid'] = d['uid']
-    first_column = e.pop('uid')
-    e.insert(0, 'uid', first_column)
-    distances, indicies = knn.kneighbors(e[genres])
-    l = indicies.tolist()
-    page_list = l[0][page_index*50:page_index*50 + 50]
-    listtoreturn = (dfsql.iloc[page_list, :]['uid']).tolist()
-    return jsonify(listtoreturn)
+    connection.commit()
+    return '', 204
+
+
+@app.route('/get_match', methods=['GET'])
+def get_match():
+    page_size = 50
+    page_index = int(request.args.get("page"))
+    uid = request.args.get("uid")
+
+    user_interests = get_user_interests(uid)
+    if user_interests is None:
+        return GetMatchesResponse(0, []).__dict__, 200
+
+    dfsql = pd.read_sql_query("SELECT uid, interests FROM user_interests WHERE uid!=%s", connection, params=[uid])
+    genres_table = pd.DataFrame(dfsql["interests"].apply(json.loads).tolist())
+    knn = NearestNeighbors(n_neighbors=genres_table.shape[0]).fit(genres_table)
+
+    distances, indices = knn.kneighbors(user_interests)
+    page_list = indices.tolist()[0][page_index*page_size:page_index*page_size + page_size]
+    total_pages = ceil(dfsql.shape[0] / page_size)
+    return GetMatchesResponse(total_pages, (dfsql.iloc[page_list, :]['uid']).tolist()).__dict__
+
+
+def get_user_interests(uid):
+    with connection.cursor() as cursor:
+        sql_query = "SELECT interests FROM user_interests WHERE uid=%s"
+        cursor.execute(sql_query, uid)
+        user_interests = cursor.fetchone()
+        if user_interests is None:
+            return None
+
+        user_interests_table = pd.DataFrame([json.loads(user_interests[0])])
+        return user_interests_table
 
 
 if __name__ == '__main__':
