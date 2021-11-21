@@ -25,6 +25,7 @@ public class DbVisitedRecommendationsRepository implements VisitedRecommendation
     public void markVisited(UUID userId, UUID targetId) {
         context.insertInto(VISITED_RECS)
                 .set(new VisitedRecsRecord(userId, targetId))
-                .onDuplicateKeyIgnore();
+                .onDuplicateKeyIgnore()
+                .execute();
     }
 }
