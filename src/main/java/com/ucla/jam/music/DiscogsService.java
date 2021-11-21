@@ -1,8 +1,13 @@
 package com.ucla.jam.music;
 
-import com.ucla.jam.music.responses.*;
+import com.ucla.jam.music.responses.ArtistReleaseResponse;
+import com.ucla.jam.music.responses.MasterResourceResponse;
+import com.ucla.jam.music.responses.SearchResponse;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
+import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.resources.ArtistResource;
+import com.ucla.jam.util.pagination.Pagination;
+import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -10,13 +15,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
+import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -25,7 +31,7 @@ public class DiscogsService {
 
     private static final String ARTIST_SEARCH_TYPE = "artist";
     private final DiscogsWebClientProvider webClientProvider;
-    private final int globalMaxCount;
+    private final int maxItemCount;
     private final int batchSize;
 
     public Future<ArtistResource.QueryResponse> artistSearch(String artist, int page) {
@@ -48,15 +54,18 @@ public class DiscogsService {
         return artistSearch(artist, 1);
     }
 
-    public Future<Map<Style, Integer>> artistStyles(String artistUrl) {
+    public CompletableFuture<Map<Style, Integer>> artistStyles(String artistUrl) {
         CompletableFuture<Map<Style, Integer>> future = new CompletableFuture<>();
-        paginatedRequest(
+        Pagination.accumulatingPaginatedRequest(
                 new ArtistReleasesRequest(artistUrl),
-                globalMaxCount,
+                maxItemCount,
                 new ResultHandler<>() {
                     @Override
                     public void completed(List<ArtistReleaseResponse.Release> releases) {
-                        getStyles(releases, future);
+                        getStyles(releases.stream()
+                                .filter(release -> release.getType() == MASTER)
+                                .collect(toList()),
+                                future);
                     }
 
                     @Override
@@ -68,60 +77,26 @@ public class DiscogsService {
     }
 
     private void getStyles(List<ArtistReleaseResponse.Release> releases, CompletableFuture<Map<Style, Integer>> future) {
-        Flux.fromIterable(releases)
+        Collections.shuffle(releases);
+        Flux.fromIterable(releases.subList(0, batchSize))
                 .flatMapSequential(release -> webClientProvider.get()
                         .get()
                         .uri(release.getResource_url())
                         .retrieve()
                         .bodyToMono(MasterResourceResponse.class)
-                        .onErrorResume(error -> Mono.empty()),
-                        batchSize)
+                        .onErrorResume(error -> {
+                            log.error("Failed to fetch master resource, {}", error.getMessage());
+                            return Mono.empty();
+                        }))
                 .collectList()
                 .subscribe(masters -> {
                     Map<Style, Integer> stylesMap = new HashMap<>();
                     masters.stream()
+                            .filter(master -> master.getStyles() != null)
                             .flatMap(master -> master.getStyles().stream())
                             .forEach(style -> stylesMap.put(style, stylesMap.getOrDefault(style, 0) + 1));
                     future.complete(stylesMap);
                 });
-    }
-
-    private static <I, T extends PaginatedResponse<I>> void paginatedRequest(
-            PaginatedRequest<I, T> request,
-            int countRemaining,
-            ResultHandler<List<I>> handler
-    ) {
-        paginatedRequest(request, countRemaining, 1, List.of(), handler);
-    }
-
-    private static <I, T extends PaginatedResponse<I>> void paginatedRequest(
-            PaginatedRequest<I, T> request,
-            int countRemaining,
-            int page,
-            List<I> currentItems,
-            ResultHandler<List<I>> handler
-    ) {
-        request.withPage(page)
-                .doOnError(handler::failed)
-                .onErrorResume(error -> Mono.empty())
-                .subscribe(response -> {
-                    List<I> combinedResults = Stream.concat(
-                                    currentItems.stream(),
-                                    response.getItems()
-                                            .stream()
-                                            .limit(countRemaining))
-                            .collect(toList());
-                    int perPage = combinedResults.size();
-                    if (countRemaining <= perPage || page >= response.getPagination().getPages()) {
-                        handler.completed(combinedResults);
-                    } else {
-                        paginatedRequest(request, countRemaining - perPage, page + 1, combinedResults, handler);
-                    }
-                });
-    }
-
-    private interface PaginatedRequest<I, T extends PaginatedResponse<I>> {
-        Mono<T> withPage(int page);
     }
 
     @Value
@@ -136,6 +111,7 @@ public class DiscogsService {
                             .queryParam("q", query)
                             .queryParam("type", type)
                             .queryParam("page", page)
+                            .queryParam("per_page", 100)
                             .build()
                             .toUriString())
                     .retrieve()
@@ -153,6 +129,7 @@ public class DiscogsService {
                     .uri(UriComponentsBuilder.fromUriString(artistUrl)
                             .pathSegment("releases")
                             .queryParam("page", page)
+                            .queryParam("per_page", 100)
                             .build()
                             .toUriString())
                     .retrieve()

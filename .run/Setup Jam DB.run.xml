@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Setup Jam DB" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.jooq.codegen.GenerationTool" />
+    <module name="jam" />
+    <option name="PROGRAM_PARAMETERS" value="jooq-codegen.xml" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.jooq.codegen.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Create Tables" run_configuration_type="DatabaseScript" />
+    </method>
+  </configuration>
+</component>

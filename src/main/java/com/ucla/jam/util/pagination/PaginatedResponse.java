@@ -1,8 +1,8 @@
-package com.ucla.jam.music.responses;
+package com.ucla.jam.util.pagination;
 
 import java.util.List;
 
 public interface PaginatedResponse<T> {
-    Pagination getPagination();
+    PaginationContext getPagination();
     List<T> getItems();
 }

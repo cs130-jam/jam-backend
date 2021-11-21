@@ -6,7 +6,7 @@ import com.ucla.jam.session.SessionInfo;
 import com.ucla.jam.user.UnknownUserException;
 import com.ucla.jam.user.User;
 import com.ucla.jam.user.User.UserView;
-import com.ucla.jam.user.UserRepository;
+import com.ucla.jam.user.UserManager;
 import com.ucla.jam.util.Location;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -23,24 +23,24 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 public class UserResource {
 
-    private final UserRepository userRepository;
+    private final UserManager userManager;
 
     @GetMapping(value = "user", produces = APPLICATION_JSON_VALUE)
     public User getSessionUser(@SessionFromHeader SessionInfo sessionInfo) {
-        return userRepository.find(sessionInfo.getUserId())
+        return userManager.getUser(sessionInfo.getUserId())
                 .orElseThrow(UnknownUserException::new);
     }
 
     @PostMapping(value = "user", consumes = APPLICATION_JSON_VALUE)
     public void setSessionUserInfo(@RequestBody UserProfileUpdate update, @SessionFromHeader SessionInfo sessionInfo) {
-        User user = userRepository.find(sessionInfo.getUserId())
+        User user = userManager.getUser(sessionInfo.getUserId())
                 .orElseThrow(UnknownUserException::new);
-        userRepository.insert(user.withProfile(update.toProfile(user.getProfile())));
+        userManager.updateUserProfile(user, update.toProfile(user.getProfile()));
     }
 
     @GetMapping(value = "user/{userId}", produces = APPLICATION_JSON_VALUE)
     public UserView getUser(@PathVariable UUID userId) {
-        return UserView.ofUser(userRepository.find(userId)
+        return UserView.ofUser(userManager.getUser(userId)
                 .orElseThrow(UnknownUserException::new));
     }
 

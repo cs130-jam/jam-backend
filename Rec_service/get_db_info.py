@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class AppProperties:
     username: str
     password: str
+
 
 def getProps() -> AppProperties:
     with open("../src/main/resources/application.properties") as appProperties:

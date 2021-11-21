@@ -1,6 +1,7 @@
 package com.ucla.jam.music.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ucla.jam.util.pagination.PaginatedResponse;
 import lombok.Value;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 @Value
 public class SearchResponse implements PaginatedResponse<SearchResponse.Result> {
 
-    Pagination pagination;
+    DiscogsPagination pagination;
     List<Result> results;
 
     @Override

@@ -34,7 +34,9 @@
                         .*\.chatroom_members\.room|
                         .*\.chatroom_members\.user|
                         .*\.chats\.room|
-                        .*\.chats\.user
+                        .*\.chats\.user|
+                        .*\.visited_recs\.userId|
+                        .*\.visited_recs\.targetId
                     </includeExpression>
                     <includeTypes>CHAR\(36\)</includeTypes>
                 </forcedType>
