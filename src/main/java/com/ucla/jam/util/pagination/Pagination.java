@@ -47,13 +47,11 @@ public class Pagination {
                 .onErrorResume(error -> Mono.empty())
                 .subscribe(response -> {
                     if (response.getPagination().getTotalPages() < page) {
-                        throw new NoRecommendationFoundException();
+                        throw new NoPagesRemainingException();
                     }
                     PageHandler<I> nextHandler = pageHandler.handle(response.getItems());
-                    if (nextHandler.isFinished()) {
+                    if (page == response.getPagination().getTotalPages() || nextHandler.isFinished()) {
                         handler.completed(nextHandler.getResult());
-                    } else if (page == response.getPagination().getTotalPages()) {
-                        throw new NoRecommendationFoundException();
                     } else {
                         paginatedRequest(request, nextHandler, page + 1, handler);
                     }

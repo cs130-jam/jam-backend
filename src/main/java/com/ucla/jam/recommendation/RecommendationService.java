@@ -1,15 +1,16 @@
 package com.ucla.jam.recommendation;
 
+import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
 import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.music.ResultHandler;
 import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.recommendation.responses.GetRecommendationsResponse;
 import com.ucla.jam.user.User;
-import com.ucla.jam.util.Futures;
 import com.ucla.jam.util.pagination.Pagination.PageHandler;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -37,6 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class RecommendationService {
 
     private final VisitedRecommendationsRepository visitedRepository;
+    private final FriendManagerFactory friendManagerFactory;
     private final RecommendationWebClientProvider webClientProvider;
     private final DiscogsService discogsService;
 
@@ -53,13 +52,11 @@ public class RecommendationService {
     }
 
     private void insertUser(UUID userId, User.Profile profile) {
-        Futures.allOf(profile.getMusicInterests().stream()
-                        .map(interest -> discogsService.artistStyles(interest.getPath()))
-                        .collect(toList()))
-                .thenApply(maps -> maps.stream()
-                        .flatMap(map -> map.entrySet().stream())
-                        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, Integer::sum)))
-                .thenAccept(styleMap -> webClientProvider.get()
+        CompletableFuture<Map<Style, Integer>> identity = CompletableFuture.completedFuture(new HashMap<>());
+        profile.getMusicInterests().stream()
+                .map(interest -> discogsService.artistStyles(interest.getPath()))
+                .reduce(identity, (acc, stylesFuture) -> acc.thenCombine(stylesFuture, RecommendationService::combineStyleMaps))
+                .thenApply(styleMap -> webClientProvider.get()
                         .post()
                         .uri("insert_user")
                         .contentType(APPLICATION_JSON)
@@ -73,6 +70,14 @@ public class RecommendationService {
                         .subscribe(entity -> log.info("Got status code = {}", entity.getStatusCode())));
     }
 
+    @SneakyThrows
+    private static Map<Style, Integer> combineStyleMaps(Map<Style, Integer> mapA, Map<Style, Integer> mapB) {
+        Thread.sleep(2000);
+        return Stream.of(mapA, mapB)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(toMap(Entry::getKey, Entry::getValue, Integer::sum));
+    }
+
     public void markVisited(UUID sourceUser, UUID targetUser) {
         visitedRepository.markVisited(sourceUser, targetUser);
     }
@@ -81,7 +86,9 @@ public class RecommendationService {
         CompletableFuture<UUID> future = new CompletableFuture<>();
         paginatedRequest(
                 new RecommendationRequest(userId),
-                ValidUserPageHandler.forVisitedUsers(Set.copyOf(visitedRepository.getVisited(userId))),
+                ValidUserPageHandler.forVisitedUsersAndFriends(
+                        Set.copyOf(visitedRepository.getVisited(userId)),
+                        Set.copyOf(friendManagerFactory.forUser(userId).getFriends())),
                 new ResultHandler<>() {
                     @Override
                     public void completed(List<UUID> result) {
@@ -125,6 +132,7 @@ public class RecommendationService {
         @With
         private final UUID userId;
         private final Set<UUID> visitedUsers;
+        private final Set<UUID> friends;
 
         @Override
         public boolean isFinished() {
@@ -133,20 +141,23 @@ public class RecommendationService {
 
         @Override
         public PageHandler<UUID> handle(List<UUID> page) {
-            // TODO: exclude friends
             return withUserId(page.stream()
                     .filter(not(visitedUsers::contains))
+                    .filter(not(friends::contains))
                     .findFirst()
                     .orElse(null));
         }
 
         @Override
         public List<UUID> getResult() {
+            if (userId == null) {
+                throw new NoRecommendationFoundException();
+            }
             return List.of(userId);
         }
 
-        public static ValidUserPageHandler forVisitedUsers(Set<UUID> visitedUsers) {
-            return new ValidUserPageHandler(null, visitedUsers);
+        public static ValidUserPageHandler forVisitedUsersAndFriends(Set<UUID> visitedUsers, Set<UUID> friends) {
+            return new ValidUserPageHandler(null, visitedUsers, friends);
         }
     }
 }
