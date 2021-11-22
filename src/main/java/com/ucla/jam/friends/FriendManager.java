@@ -16,6 +16,9 @@ public class FriendManager {
     private final UUID userId;
 
     public FriendResult tryFriend(UUID targetId) {
+        if (targetId.equals(userId)) {
+            throw new SameUserException();
+        }
         if (friendRepository.getAll(userId).contains(targetId)) {
             return ALREADY_FRIENDS;
         }

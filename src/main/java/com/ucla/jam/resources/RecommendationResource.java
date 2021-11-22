@@ -1,5 +1,7 @@
 package com.ucla.jam.resources;
 
+import com.ucla.jam.friends.FriendManager;
+import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
 import com.ucla.jam.music.SearchException;
 import com.ucla.jam.recommendation.RecommendationService;
 import com.ucla.jam.session.SessionFromHeader;
@@ -21,6 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class RecommendationResource {
 
     private final RecommendationService recommendationService;
+    private final FriendManagerFactory friendManagerFactory;
 
     @GetMapping(value = "match", produces = APPLICATION_JSON_VALUE)
     public UserIdToken getRec(@SessionFromHeader SessionInfo sessionInfo) {
@@ -38,8 +41,8 @@ public class RecommendationResource {
     @PostMapping(value = "match/accept", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void acceptMatch(@SessionFromHeader SessionInfo sessionInfo, @RequestBody UserIdToken token) {
+        friendManagerFactory.forUser(sessionInfo.getUserId()).tryFriend(token.getUserId());
         recommendationService.markVisited(sessionInfo.getUserId(), token.getUserId());
-        // TODO: put friend manager request here
     }
 
     @PostMapping(value = "match/reject", consumes = APPLICATION_JSON_VALUE)
