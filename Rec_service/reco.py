@@ -52,7 +52,7 @@ def insert_user():
 @app.route('/get_match', methods=['GET'])
 def get_match():
     page_size = 50
-    page_index = int(request.args.get("page"))
+    page_index = int(request.args.get("page")) - 1
     uid = request.args.get("uid")
 
     user_interests = get_user_interests(uid)
