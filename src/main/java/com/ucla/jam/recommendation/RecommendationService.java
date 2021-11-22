@@ -133,6 +133,7 @@ public class RecommendationService {
 
         @Override
         public PageHandler<UUID> handle(List<UUID> page) {
+            // TODO: exclude friends
             return withUserId(page.stream()
                     .filter(not(visitedUsers::contains))
                     .findFirst()
