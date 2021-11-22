@@ -36,6 +36,8 @@ class GetMatchesResponse:
 def insert_user():
     request_body = InsertRequestBody(**request.get_json())
     total_genre_count = sum(request_body.genres.values())
+    if total_genre_count == 0:
+            total_genre_count = 1
     filled_genres = defaultdict(int, request_body.genres)
     normalized_genres = {genre: filled_genres[genre] / total_genre_count for genre in genres}
     sql = "INSERT INTO user_interests (uid, interests) VALUES (%s, %s) ON DUPLICATE KEY UPDATE interests=%s"
