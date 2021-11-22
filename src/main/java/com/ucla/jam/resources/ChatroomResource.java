@@ -2,7 +2,6 @@ package com.ucla.jam.resources;
 
 import com.ucla.jam.chat.ChatManager;
 import com.ucla.jam.chat.Chatroom;
-import com.ucla.jam.chat.ChatroomRepository;
 import com.ucla.jam.chat.UnknownChatroomException;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
@@ -19,7 +18,6 @@ import java.util.UUID;
 public class ChatroomResource {
 
     private final ChatManager chatManager;
-    private final ChatroomRepository chatroomRepository;
     private final Clock clock;
 
     @GetMapping(value = "/chatroom/{roomId}")
