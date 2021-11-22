@@ -40,14 +40,14 @@ public class DbFriendRequestRepository implements FriendRequestRepository {
 
     @Override
     public List<UUID> requestsTo(UUID targetUser) {
-        return context.select(FRIEND_REQUESTS.SOURCE)
+        return context.selectFrom(FRIEND_REQUESTS)
                 .where(FRIEND_REQUESTS.TARGET.eq(targetUser))
                 .fetch(FRIEND_REQUESTS.SOURCE);
     }
 
     @Override
     public List<UUID> requestsFrom(UUID sourceUser) {
-        return context.select(FRIEND_REQUESTS.TARGET)
+        return context.selectFrom(FRIEND_REQUESTS)
                 .where(FRIEND_REQUESTS.SOURCE.eq(sourceUser))
                 .fetch(FRIEND_REQUESTS.TARGET);
     }

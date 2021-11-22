@@ -1,5 +1,6 @@
 package com.ucla.jam.friends;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @Import({
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Import;
 })
 public class FriendContext {
 
+    @Bean
     public FriendManager.FriendManagerFactory friendManagerFactory(
             FriendRepository friendRepository,
             FriendRequestRepository friendRequestRepository
