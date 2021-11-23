@@ -1,4 +1,4 @@
-package com.ucla.jam.chat;
+package com.ucla.jam.chat.chatroom;
 
 import generated.jooq.tables.records.ChatroomInvitesRecord;
 import lombok.RequiredArgsConstructor;

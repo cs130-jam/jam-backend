@@ -6,7 +6,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.Chat;
 import com.ucla.jam.chat.ChatManager;
-import com.ucla.jam.chat.UnknownChatroomException;
+import com.ucla.jam.chat.chatroom.UnknownChatroomException;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
 import lombok.RequiredArgsConstructor;

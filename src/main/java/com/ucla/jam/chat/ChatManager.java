@@ -1,6 +1,7 @@
 package com.ucla.jam.chat;
 
 import com.google.common.collect.ImmutableSet;
+import com.ucla.jam.chat.chatroom.*;
 import com.ucla.jam.ws.WebSocketManager;
 import lombok.RequiredArgsConstructor;
 

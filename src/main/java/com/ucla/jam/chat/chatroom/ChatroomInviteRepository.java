@@ -1,4 +1,4 @@
-package com.ucla.jam.chat;
+package com.ucla.jam.chat.chatroom;
 
 import java.util.List;
 import java.util.Optional;

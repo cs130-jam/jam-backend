@@ -1,7 +1,8 @@
-package com.ucla.jam.chat;
+package com.ucla.jam.chat.chatroom;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.ucla.jam.chat.Chatroom;
 import generated.jooq.tables.records.ChatroomMembersRecord;
 import generated.jooq.tables.records.ChatroomsRecord;
 import lombok.AllArgsConstructor;

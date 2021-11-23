@@ -1,5 +1,9 @@
 package com.ucla.jam.chat;
 
+import com.ucla.jam.chat.chatroom.ChatroomInviteRepository;
+import com.ucla.jam.chat.chatroom.ChatroomRepository;
+import com.ucla.jam.chat.chatroom.DbChatroomInviteRepository;
+import com.ucla.jam.chat.chatroom.DbChatroomRepository;
 import com.ucla.jam.ws.WebSocketContext;
 import com.ucla.jam.ws.WebSocketManager;
 import org.springframework.context.annotation.Bean;

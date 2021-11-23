@@ -1,4 +1,4 @@
-package com.ucla.jam.chat;
+package com.ucla.jam.chat.chatroom;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
