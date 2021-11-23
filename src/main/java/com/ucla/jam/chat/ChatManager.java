@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
-
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class ChatManager {
@@ -60,7 +60,10 @@ public class ChatManager {
         UUID roomId = UUID.randomUUID();
         Chatroom chatroom = new Chatroom(
                 roomId,
-                ImmutableSet.copyOf(members),
+                ImmutableSet.<UUID>builder()
+                        .addAll(members)
+                        .add(admin)
+                        .build(),
                 clock.instant(),
                 false,
                 new Chatroom.Info(
@@ -70,6 +73,7 @@ public class ChatManager {
                         admin
                 ));
         chatroomRepository.insert(chatroom);
+        chatroom.getMembers().forEach(member -> chatroomRepository.insertMember(roomId, member));
         return roomId;
     }
 
@@ -77,13 +81,7 @@ public class ChatManager {
         if (!inviteRepository.getAll(userId).contains(roomId)) {
             throw new NoInviteException();
         }
-
-        Chatroom chatroom = chatroomRepository.get(roomId)
-                .orElseThrow(UnknownChatroomException::new);
-        chatroomRepository.insert(chatroom.withMembers(ImmutableSet.<UUID>builder()
-                .addAll(chatroom.getMembers())
-                .add(userId)
-                .build()));
+        chatroomRepository.insertMember(roomId, userId);
         inviteRepository.uninviteUser(userId, roomId);
     }
 
@@ -91,12 +89,11 @@ public class ChatManager {
         if (!hasChatroom(userId, roomId)) {
             throw new NotMemberException();
         }
-
         Chatroom chatroom = getChatroomIfMember(userId, roomId);
-        chatroomRepository.insert(chatroom
-                .withMembers(chatroom.getMembers().stream()
-                        .filter(not(userId::equals))
-                        .collect(toUnmodifiableSet())));
+        if (chatroom.getInfo() == null || chatroom.getInfo().getAdmin().equals(userId)) {
+            throw new IsAdminException();
+        }
+        chatroomRepository.removeMember(roomId, userId);
     }
 
     public void inviteToChatroom(UUID roomId, UUID sourceId, UUID targetId) {
@@ -121,14 +118,10 @@ public class ChatManager {
 
     public void removeFromChatroom(UUID roomId, UUID sourceId, UUID targetId) {
         Chatroom chatroom = getChatroomIfMember(sourceId, roomId);
-        if (chatroom.isDirectMessage() || chatroom.getInfo() == null || chatroom.getInfo().getAdmin() != sourceId) {
+        if (chatroom.isDirectMessage() || chatroom.getInfo() == null || !chatroom.getInfo().getAdmin().equals(sourceId)) {
             throw new NotAdminException();
         }
         leaveChatroom(targetId, roomId);
-    }
-
-    public Collection<Chatroom> getAll() {
-        return chatroomRepository.allChatrooms();
     }
 
     public boolean hasChatroom(UUID userId, UUID roomId) {

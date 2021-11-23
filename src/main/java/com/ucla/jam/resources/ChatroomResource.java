@@ -1,7 +1,8 @@
 package com.ucla.jam.resources;
 
 import com.google.common.collect.ImmutableSet;
-import com.ucla.jam.chat.*;
+import com.ucla.jam.chat.ChatManager;
+import com.ucla.jam.chat.Chatroom;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RequiredArgsConstructor
@@ -19,6 +22,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class ChatroomResource {
 
     private final ChatManager chatManager;
+
+    @GetMapping(value = "/chatrooms", produces = APPLICATION_JSON_VALUE)
+    public List<UUID> getUserChatrooms(@SessionFromHeader SessionInfo sessionInfo) {
+        return chatManager.userChatrooms(sessionInfo.getUserId()).stream()
+                .map(Chatroom::getId)
+                .collect(toList());
+    }
 
     @GetMapping(value = "/chatroom/{roomId}")
     public Chatroom getChatroom(@PathVariable UUID roomId, @SessionFromHeader SessionInfo sessionInfo) {
@@ -39,10 +49,8 @@ public class ChatroomResource {
 
     @PostMapping(value = "/chatroom", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ChatroomIdResponse createChatroom(@RequestBody ChatroomCreationBody chatroom, @SessionFromHeader SessionInfo sessionInfo) {
-        return new ChatroomIdResponse(chatManager.createChatroom(ImmutableSet.<UUID>builder()
-                        .addAll(chatroom.getMembers())
-                        .add(sessionInfo.getUserId())
-                        .build(),
+        return new ChatroomIdResponse(chatManager.createChatroom(
+                Set.copyOf(chatroom.getMembers()),
                 sessionInfo.getUserId(),
                 chatroom.getInfo().getName()));
     }

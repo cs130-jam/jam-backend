@@ -46,15 +46,6 @@ public class DbChatroomRepository implements ChatroomRepository {
                 .fetch(PartialChatroom::fromRecord));
     }
 
-    @Override
-    public Collection<Chatroom> allChatrooms() {
-        return groupOnId(context.select(CHATROOM_MEMBERS.USER, CHATROOMS.asterisk())
-                .from(CHATROOM_MEMBERS.leftJoin(CHATROOMS)
-                        .on(CHATROOM_MEMBERS.ROOM.eq(CHATROOMS.ID)))
-                .fetch(PartialChatroom::fromRecord));
-
-    }
-
     private Collection<Chatroom> groupOnId(List<PartialChatroom> partials) {
         return partials.stream()
                 .collect(Collectors.groupingBy(

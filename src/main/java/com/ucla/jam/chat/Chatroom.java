@@ -13,7 +13,6 @@ import java.util.UUID;
 @Value
 public class Chatroom {
     @NonNull UUID id;
-    @With
     Set<UUID> members;
     @With Instant updated;
     boolean isDirectMessage;

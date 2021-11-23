@@ -7,7 +7,6 @@ import java.util.UUID;
 public interface ChatroomRepository {
     Optional<Chatroom> get(UUID roomId);
     Collection<Chatroom> getAll(UUID userId);
-    Collection<Chatroom> allChatrooms(); // temporary function
 
     void insert(Chatroom chatroom);
     void removeMember(UUID roomId, UUID userId);
