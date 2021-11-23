@@ -11,16 +11,18 @@ import java.time.Clock;
         WebSocketContext.class,
 
         DbChatRepository.class,
-        DbChatroomRepository.class
+        DbChatroomRepository.class,
+        DbChatroomInviteRepository.class
 })
 public class ChatContext {
     @Bean
     public ChatManager chatManager(
             ChatroomRepository chatroomRepository,
+            ChatroomInviteRepository inviteRepository,
             ChatRepository chatRepository,
             WebSocketManager webSocketManager,
             Clock clock
     ) {
-        return new ChatManager(chatroomRepository, chatRepository, webSocketManager, clock);
+        return new ChatManager(chatroomRepository, inviteRepository, chatRepository, webSocketManager, clock);
     }
 }

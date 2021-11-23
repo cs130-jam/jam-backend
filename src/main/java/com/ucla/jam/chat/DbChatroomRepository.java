@@ -1,9 +1,7 @@
 package com.ucla.jam.chat;
 
-import static generated.jooq.tables.ChatroomMembers.CHATROOM_MEMBERS;
-import static generated.jooq.tables.Chatrooms.CHATROOMS;
-
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import generated.jooq.tables.records.ChatroomMembersRecord;
 import generated.jooq.tables.records.ChatroomsRecord;
 import lombok.AllArgsConstructor;
@@ -13,13 +11,12 @@ import lombok.Value;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static generated.jooq.tables.ChatroomMembers.CHATROOM_MEMBERS;
+import static generated.jooq.tables.Chatrooms.CHATROOMS;
 
 @Component
 @RequiredArgsConstructor
@@ -124,7 +121,7 @@ public class DbChatroomRepository implements ChatroomRepository {
         public Chatroom build() {
             return new Chatroom(
                     chatroomsRecord.getId(),
-                    ImmutableList.copyOf(members),
+                    ImmutableSet.copyOf(members),
                     chatroomsRecord.getUpdated(),
                     chatroomsRecord.getIsdirectmessage(),
                     chatroomsRecord.getInfo());

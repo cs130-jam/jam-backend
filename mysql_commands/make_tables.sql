@@ -53,7 +53,7 @@ CREATE TABLE chatroom_invites (
     FOREIGN KEY (room) REFERENCES chatrooms(id) ON DELETE CASCADE,
     FOREIGN KEY (source) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (target) REFERENCES users(id) ON DELETE CASCADE,
-    PRIMARY KEY (room, source, target)
+    PRIMARY KEY (room, target)
 );
 
 CREATE TABLE chatroom_members (
