@@ -48,6 +48,10 @@ public class FriendManager {
         return NOT_FRIENDS_OR_REQUESTED;
     }
 
+    public void removeRequest(UUID targetId) {
+        friendRequestRepository.unrequest(userId, targetId);
+    }
+
     public List<UUID> getFriends() {
         return friendRepository.getAll(userId);
     }

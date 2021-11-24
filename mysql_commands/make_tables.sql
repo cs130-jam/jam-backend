@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS chats;
+DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS visited_recs;
 DROP TABLE IF EXISTS chatroom_invites;
 DROP TABLE IF EXISTS chatroom_members;
@@ -12,6 +13,16 @@ CREATE TABLE users (
     id CHAR(36) PRIMARY KEY NOT NULL,
     profile TEXT,
     preferences TEXT
+);
+
+CREATE TABLE notifications (
+    id CHAR(36) NOT NULL,
+    userId CHAR(36) NOT NULL,
+    title TEXT NOT NULL,
+    at BIGINT NOT NULL,
+    accept TEXT,
+    reject TEXT,
+    PRIMARY KEY (id, userId)
 );
 
 CREATE TABLE internal_credentials (

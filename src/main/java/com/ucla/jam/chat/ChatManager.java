@@ -117,6 +117,10 @@ public class ChatManager {
         inviteRepository.uninviteUser(targetId, roomId);
     }
 
+    public void rejectInvite(UUID roomId, UUID targetId) {
+        inviteRepository.uninviteUser(targetId, roomId);
+    }
+
     public void removeFromChatroom(UUID roomId, UUID sourceId, UUID targetId) {
         Chatroom chatroom = getChatroomIfMember(sourceId, roomId);
         if (chatroom.isDirectMessage() || chatroom.getInfo() == null || !chatroom.getInfo().getAdmin().equals(sourceId)) {

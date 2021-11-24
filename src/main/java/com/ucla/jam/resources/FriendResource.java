@@ -55,6 +55,12 @@ public class FriendResource {
         }
     }
 
+    @PostMapping(value = "friends/requests/reject")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reject(@RequestParam UUID sourceId, @SessionFromHeader SessionInfo sessionInfo) {
+        friendManagerFactory.forUser(sourceId).removeRequest(sessionInfo.getUserId());
+    }
+
     @Value
     public static class Requests {
         List<UUID> outgoing;
