@@ -69,11 +69,13 @@ public class RecommendationService {
                 })
                 .flatMap(Collection::stream)
                 .collect(toList());
+        log.info("Got masters: {}", allMasters);
         Map<Style, Integer> stylesMap = allMasters.stream()
                 .map(discogsService::masterStyles)
                 .map(Futures::sneakyGet)
                 .flatMap(Collection::stream)
                 .collect(toMap(identity(), style -> 1, Integer::sum));
+        log.info("Got style map: {}", stylesMap);
         webClientProvider.get()
                 .post()
                 .uri("insert_user")

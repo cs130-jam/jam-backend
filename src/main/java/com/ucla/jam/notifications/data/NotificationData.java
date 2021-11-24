@@ -1,5 +1,6 @@
 package com.ucla.jam.notifications.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.ucla.jam.notifications.data.friendrequest.FriendRequestNotificationData;
@@ -11,6 +12,7 @@ import com.ucla.jam.util.jooq.JsonConverter;
         @JsonSubTypes.Type(value = FriendRequestNotificationData.class, name = FriendRequestNotificationData.TYPE),
         @JsonSubTypes.Type(value = GroupInviteNotificationData.class, name = GroupInviteNotificationData.TYPE)
 })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public interface NotificationData {
     String getType();
 

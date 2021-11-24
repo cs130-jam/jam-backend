@@ -48,6 +48,7 @@ public class Pagination {
                 .subscribe(response -> {
                     if (response.getPagination().getTotalPages() < page) {
                         handler.failed(new NoPagesRemainingException());
+                        return;
                     }
                     PageHandler<I> nextHandler = pageHandler.handle(response.getItems());
                     if (page == response.getPagination().getTotalPages() || nextHandler.isFinished()) {
