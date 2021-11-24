@@ -35,7 +35,6 @@ build/
 application.properties
 jooq-codegen.xml
 /src/main/java/generated
-/.run/My Create Tables.run.xml
 
 Rec_service/venv
 Rec_service/__pycache__
