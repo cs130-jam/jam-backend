@@ -10,19 +10,17 @@ import org.springframework.context.annotation.Import;
 
 @Import({
         DbVisitedRecommendationsRepository.class,
-        MusicContext.class,
-        FriendContext.class
+        MusicContext.class
 })
 public class RecommendationContext {
 
     @Bean
     public RecommendationService recommendationService(
         VisitedRecommendationsRepository repository,
-        FriendManagerFactory friendManagerFactory,
         @Value("${recommendations.base.url}") String baseUrl,
         DiscogsService discogsService,
         @Value("${recommendations.masters.sample.size}") int mastersSampleSize
     ) {
-        return new RecommendationService(repository, friendManagerFactory, new RecommendationWebClientProvider(baseUrl), discogsService, mastersSampleSize);
+        return new RecommendationService(repository, new RecommendationWebClientProvider(baseUrl), discogsService, mastersSampleSize);
     }
 }
