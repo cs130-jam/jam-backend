@@ -6,23 +6,19 @@ import com.ucla.jam.music.responses.SearchResponse;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
 import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.resources.ArtistResource;
-import com.ucla.jam.util.pagination.Pagination;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
+import static com.ucla.jam.util.pagination.Pagination.accumulatingPaginatedRequest;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -32,7 +28,6 @@ public class DiscogsService {
     private static final String ARTIST_SEARCH_TYPE = "artist";
     private final DiscogsWebClientProvider webClientProvider;
     private final int maxItemCount;
-    private final int batchSize;
 
     public Future<ArtistResource.QueryResponse> artistSearch(String artist, int page) {
         CompletableFuture<ArtistResource.QueryResponse> future = new CompletableFuture<>();
@@ -54,18 +49,16 @@ public class DiscogsService {
         return artistSearch(artist, 1);
     }
 
-    public CompletableFuture<Map<Style, Integer>> artistStyles(String artistUrl) {
-        CompletableFuture<Map<Style, Integer>> future = new CompletableFuture<>();
-        Pagination.accumulatingPaginatedRequest(
+    public Future<List<ArtistReleaseResponse.Release>> artistReleases(String artistUrl) {
+        CompletableFuture<List<ArtistReleaseResponse.Release>> future = new CompletableFuture<>();
+        accumulatingPaginatedRequest(
                 new ArtistReleasesRequest(artistUrl),
                 maxItemCount,
                 new ResultHandler<>() {
                     @Override
                     public void completed(List<ArtistReleaseResponse.Release> releases) {
-                        getStyles(releases.stream()
-                                .filter(release -> release.getType() == MASTER)
-                                .collect(toList()),
-                                future);
+                        log.info("Got releases {} for {}", releases.size(), artistUrl);
+                        future.complete(releases);
                     }
 
                     @Override
@@ -76,27 +69,23 @@ public class DiscogsService {
         return future;
     }
 
-    private void getStyles(List<ArtistReleaseResponse.Release> releases, CompletableFuture<Map<Style, Integer>> future) {
-        Collections.shuffle(releases);
-        Flux.fromIterable(releases.subList(0, batchSize))
-                .flatMapSequential(release -> webClientProvider.get()
-                        .get()
-                        .uri(release.getResource_url())
-                        .retrieve()
-                        .bodyToMono(MasterResourceResponse.class)
-                        .onErrorResume(error -> {
-                            log.error("Failed to fetch master resource, {}", error.getMessage());
-                            return Mono.empty();
-                        }))
-                .collectList()
-                .subscribe(masters -> {
-                    Map<Style, Integer> stylesMap = new HashMap<>();
-                    masters.stream()
-                            .filter(master -> master.getStyles() != null)
-                            .flatMap(master -> master.getStyles().stream())
-                            .forEach(style -> stylesMap.put(style, stylesMap.getOrDefault(style, 0) + 1));
-                    future.complete(stylesMap);
+    public Future<List<Style>> masterStyles(ArtistReleaseResponse.Release master) {
+        CompletableFuture<List<Style>> future = new CompletableFuture<>();
+        webClientProvider.get()
+                .get()
+                .uri(master.getResource_url())
+                .retrieve()
+                .bodyToMono(MasterResourceResponse.class)
+                .onErrorResume(error -> {
+                    log.error("Failed to fetch master resource, {}", error.getMessage());
+                    return Mono.empty();
+                })
+                .subscribe(masterResource -> {
+                    log.info("Got styles for {}: {}", masterResource.getTitle(), masterResource.getStyles());
+                    future.complete(Optional.ofNullable(masterResource.getStyles())
+                            .orElseGet(List::of));
                 });
+        return future;
     }
 
     @Value

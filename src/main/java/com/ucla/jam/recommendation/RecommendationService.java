@@ -4,13 +4,14 @@ import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
 import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.music.ResultHandler;
+import com.ucla.jam.music.responses.ArtistReleaseResponse;
 import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.recommendation.responses.GetRecommendationsResponse;
 import com.ucla.jam.user.User;
+import com.ucla.jam.util.Futures;
 import com.ucla.jam.util.pagination.Pagination.PageHandler;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +20,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
+import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
 import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
+import static java.util.function.Function.identity;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -38,44 +40,55 @@ public class RecommendationService {
     private final FriendManagerFactory friendManagerFactory;
     private final RecommendationWebClientProvider webClientProvider;
     private final DiscogsService discogsService;
+    private final int mastersSampleSize;
 
-    public void insertUser(User user) {
-        insertUser(user.getId(), user.getProfile());
+    public void triggerInsertUser(User user) {
+        triggerInsertUser(user.getId(), user.getProfile());
     }
 
     public void updateUser(User oldUser, User.Profile newProfile) {
         Set<MusicInterest> oldInterests = Set.copyOf(oldUser.getProfile().getMusicInterests());
         Set<MusicInterest> newInterests = Set.copyOf(newProfile.getMusicInterests());
         if (!oldInterests.equals(newInterests)) {
-            insertUser(oldUser.getId(), newProfile);
+            triggerInsertUser(oldUser.getId(), newProfile);
         }
     }
 
-    private void insertUser(UUID userId, User.Profile profile) {
-        CompletableFuture<Map<Style, Integer>> identity = CompletableFuture.completedFuture(new HashMap<>());
-        profile.getMusicInterests().stream()
-                .map(interest -> discogsService.artistStyles(interest.getPath()))
-                .reduce(identity, (acc, stylesFuture) -> acc.thenCombine(stylesFuture, RecommendationService::combineStyleMaps))
-                .thenApply(styleMap -> webClientProvider.get()
-                        .post()
-                        .uri("insert_user")
-                        .contentType(APPLICATION_JSON)
-                        .body(Mono.just(new InsertRequestBody(userId, styleMap)), InsertRequestBody.class)
-                        .retrieve()
-                        .onStatus(status -> !HttpStatus.NO_CONTENT.equals(status), clientResponse -> {
-                            log.error("Failed to insert user to rec service, {}", clientResponse);
-                            return Mono.empty();
-                        })
-                        .toBodilessEntity()
-                        .subscribe(entity -> log.info("Got status code = {}", entity.getStatusCode())));
+    private void triggerInsertUser(UUID userId, User.Profile profile) {
+        new Thread(() -> insertUser(userId, profile)).start();
     }
 
-    @SneakyThrows
-    private static Map<Style, Integer> combineStyleMaps(Map<Style, Integer> mapA, Map<Style, Integer> mapB) {
-        Thread.sleep(2000);
-        return Stream.of(mapA, mapB)
-                .flatMap(map -> map.entrySet().stream())
-                .collect(toMap(Entry::getKey, Entry::getValue, Integer::sum));
+    private void insertUser(UUID userId, User.Profile profile) {
+        List<ArtistReleaseResponse.Release> allMasters = profile.getMusicInterests().stream()
+                .map(MusicInterest::getPath)
+                .map(discogsService::artistReleases)
+                .map(Futures::sneakyGet)
+                .map(releases -> {
+                    List<ArtistReleaseResponse.Release> masters = releases.stream()
+                            .filter(release -> release.getType().equals(MASTER))
+                            .collect(toList());
+                    Collections.shuffle(masters);
+                    return masters.subList(0, mastersSampleSize);
+                })
+                .flatMap(Collection::stream)
+                .collect(toList());
+        Map<Style, Integer> stylesMap = allMasters.stream()
+                .map(discogsService::masterStyles)
+                .map(Futures::sneakyGet)
+                .flatMap(Collection::stream)
+                .collect(toMap(identity(), style -> 1, Integer::sum));
+        webClientProvider.get()
+                .post()
+                .uri("insert_user")
+                .contentType(APPLICATION_JSON)
+                .body(Mono.just(new InsertRequestBody(userId, stylesMap)), InsertRequestBody.class)
+                .retrieve()
+                .onStatus(status -> !HttpStatus.NO_CONTENT.equals(status), clientResponse -> {
+                    log.error("Failed to insert user to rec service, {}", clientResponse);
+                    return Mono.empty();
+                })
+                .toBodilessEntity()
+                .subscribe(entity -> log.info("Got status code = {}", entity.getStatusCode()));
     }
 
     public void markVisited(UUID sourceUser, UUID targetUser) {

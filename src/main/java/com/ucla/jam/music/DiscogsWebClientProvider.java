@@ -8,6 +8,12 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -20,9 +26,22 @@ public class DiscogsWebClientProvider {
     private final String userAgent;
     private final String token;
     private final SslContext context;
+    private final Clock clock;
+
+    private List<Instant> reqs = new ArrayList<>();
+    private final int maxReqs = 60;
+    private final Duration maxReqsTimespan = Duration.ofMinutes(1);
 
     @SneakyThrows
-    public WebClient get() {
+    public synchronized WebClient get() {
+        Instant minuteAgo = clock.instant().minus(maxReqsTimespan);
+        while (reqs.size() > 0 && earliestReq().isBefore(minuteAgo)) {
+            removeEarliestReq();
+        }
+        if (reqs.size() >= maxReqs) {
+            Thread.sleep(Duration.between(minuteAgo, reqs.get(maxReqs - 1)).toMillis());
+        }
+        insertReq(clock.instant());
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .secure(t -> t.sslContext(context))))
@@ -33,5 +52,17 @@ public class DiscogsWebClientProvider {
                     httpHeaders.add(AUTHORIZATION, "Discogs " + TOKEN_HEADER_KEY + "=" + token);
                 })
                 .build();
+    }
+
+    private Instant earliestReq() {
+        return reqs.get(reqs.size() - 1);
+    }
+
+    private void removeEarliestReq() {
+        reqs.remove(reqs.size() - 1);
+    }
+
+    private void insertReq(Instant instant) {
+        reqs.add(0, instant);
     }
 }

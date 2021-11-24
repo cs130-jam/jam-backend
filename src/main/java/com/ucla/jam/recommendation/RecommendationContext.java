@@ -20,8 +20,9 @@ public class RecommendationContext {
         VisitedRecommendationsRepository repository,
         FriendManagerFactory friendManagerFactory,
         @Value("${recommendations.base.url}") String baseUrl,
-        DiscogsService discogsService
+        DiscogsService discogsService,
+        @Value("${recommendations.masters.sample.size}") int mastersSampleSize
     ) {
-        return new RecommendationService(repository, friendManagerFactory, new RecommendationWebClientProvider(baseUrl), discogsService);
+        return new RecommendationService(repository, friendManagerFactory, new RecommendationWebClientProvider(baseUrl), discogsService, mastersSampleSize);
     }
 }

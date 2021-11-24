@@ -18,7 +18,7 @@ public class UserManager {
 
     public User addNewUser(User.Profile profile) {
         User newUser = new User(UUID.randomUUID(), profile, new User.Preferences(DEFAULT_MAX_DISTANCE, List.of()));
-        recommendationService.insertUser(newUser);
+        recommendationService.triggerInsertUser(newUser);
         userRepository.insert(newUser);
         return newUser;
     }
