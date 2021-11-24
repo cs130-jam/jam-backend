@@ -19,6 +19,7 @@ public class ChatManager {
     private final ChatroomInviteRepository inviteRepository;
     private final ChatRepository chatRepository;
     private final WebSocketManager webSocketManager;
+    private final List<GroupInviteListener> groupInviteListeners;
     private final Clock clock;
     private final String defaultGroupPicUrl = "https://static.thenounproject.com/png/58999-200.png";
 
@@ -104,6 +105,7 @@ public class ChatManager {
         if (!hasChatroom(sourceId, roomId)) {
             throw new NotMemberException();
         }
+        groupInviteListeners.forEach(listener -> listener.invitedToGroup(sourceId, targetId, roomId));
         inviteRepository.inviteUser(sourceId, targetId, roomId);
     }
 

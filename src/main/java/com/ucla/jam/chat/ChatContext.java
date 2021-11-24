@@ -1,15 +1,13 @@
 package com.ucla.jam.chat;
 
-import com.ucla.jam.chat.chatroom.ChatroomInviteRepository;
-import com.ucla.jam.chat.chatroom.ChatroomRepository;
-import com.ucla.jam.chat.chatroom.DbChatroomInviteRepository;
-import com.ucla.jam.chat.chatroom.DbChatroomRepository;
+import com.ucla.jam.chat.chatroom.*;
 import com.ucla.jam.ws.WebSocketContext;
 import com.ucla.jam.ws.WebSocketManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.time.Clock;
+import java.util.List;
 
 @Import({
         WebSocketContext.class,
@@ -25,8 +23,14 @@ public class ChatContext {
             ChatroomInviteRepository inviteRepository,
             ChatRepository chatRepository,
             WebSocketManager webSocketManager,
+            List<GroupInviteListener> groupInviteListeners,
             Clock clock
     ) {
-        return new ChatManager(chatroomRepository, inviteRepository, chatRepository, webSocketManager, clock);
+        return new ChatManager(chatroomRepository,
+                inviteRepository,
+                chatRepository,
+                webSocketManager,
+                groupInviteListeners,
+                clock);
     }
 }

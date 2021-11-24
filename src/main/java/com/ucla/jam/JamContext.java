@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.ChatContext;
 import com.ucla.jam.friends.FriendContext;
 import com.ucla.jam.music.MusicContext;
+import com.ucla.jam.notifications.NotificationContext;
 import com.ucla.jam.recommendation.RecommendationContext;
 import com.ucla.jam.resources.*;
 import com.ucla.jam.session.SessionTokenResolver;
@@ -29,6 +30,7 @@ import java.util.List;
         MusicContext.class,
         RecommendationContext.class,
         FriendContext.class,
+        NotificationContext.class,
 
         ChatResource.class,
         ChatroomResource.class,
@@ -38,7 +40,8 @@ import java.util.List;
         ArtistResource.class,
         ProfilePictureResource.class,
         RecommendationResource.class,
-        FriendResource.class
+        FriendResource.class,
+        NotificationsResource.class
 })
 public class JamContext {
     @Bean

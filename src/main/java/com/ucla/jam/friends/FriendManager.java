@@ -13,6 +13,7 @@ public class FriendManager {
 
     private final FriendRepository friendRepository;
     private final FriendRequestRepository friendRequestRepository;
+    private final List<FriendRequestListener> friendRequestListeners;
     private final UUID userId;
 
     public FriendResult tryFriend(UUID targetId) {
@@ -30,6 +31,7 @@ public class FriendManager {
             return ACCEPTED;
         }
 
+        friendRequestListeners.forEach(listener -> listener.friendRequested(userId, targetId));
         friendRequestRepository.request(userId, targetId);
         return REQUESTED;
     }
@@ -76,9 +78,10 @@ public class FriendManager {
     public static class FriendManagerFactory {
         private final FriendRepository friendRepository;
         private final FriendRequestRepository friendRequestRepository;
+        private final List<FriendRequestListener> friendRequestListeners;
 
         public FriendManager forUser(UUID userId) {
-            return new FriendManager(friendRepository, friendRequestRepository, userId);
+            return new FriendManager(friendRepository, friendRequestRepository, friendRequestListeners, userId);
         }
     }
 
