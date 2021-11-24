@@ -1,6 +1,5 @@
 package com.ucla.jam.recommendation;
 
-import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
 import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.music.ResultHandler;
@@ -13,7 +12,6 @@ import com.ucla.jam.util.pagination.Pagination.PageHandler;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,10 +24,8 @@ import java.util.concurrent.Future;
 import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
 import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
 import static java.util.function.Function.identity;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -37,7 +33,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class RecommendationService {
 
     private final VisitedRecommendationsRepository visitedRepository;
-    private final FriendManagerFactory friendManagerFactory;
     private final RecommendationWebClientProvider webClientProvider;
     private final DiscogsService discogsService;
     private final int mastersSampleSize;
@@ -98,15 +93,17 @@ public class RecommendationService {
         visitedRepository.markVisited(sourceUser, targetUser);
     }
 
-    public Future<UUID> getRecommendation(User user) {
+    public List<UUID> getVisited(UUID userId) {
+        return visitedRepository.getVisited(userId);
+    }
+
+    public Future<UUID> getRecommendation(User user, PageHandler<UUID> pageHandler) {
         CompletableFuture<UUID> future = new CompletableFuture<>();
         ensureUser(user).thenAccept(success -> {
             if (success) {
                 paginatedRequest(
                         new RecommendationRequest(user.getId()),
-                        ValidUserPageHandler.forVisitedUsersAndFriends(
-                                Set.copyOf(visitedRepository.getVisited(user.getId())),
-                                Set.copyOf(friendManagerFactory.forUser(user.getId()).getFriends())),
+                        pageHandler,
                         new ResultHandler<>() {
                             @Override
                             public void completed(List<UUID> result) {
@@ -187,41 +184,6 @@ public class RecommendationService {
                             .toUriString())
                     .retrieve()
                     .bodyToMono(GetRecommendationsResponse.class);
-        }
-    }
-
-    @RequiredArgsConstructor(access = PRIVATE)
-    private static class ValidUserPageHandler implements PageHandler<UUID> {
-        @With
-        private final UUID userId;
-        private final Set<UUID> visitedUsers;
-        private final Set<UUID> friends;
-
-        @Override
-        public boolean isFinished() {
-            return userId != null;
-        }
-
-        @Override
-        public PageHandler<UUID> handle(List<UUID> page) {
-            return withUserId(page.stream()
-                    .filter(not(visitedUsers::contains))
-                    .filter(not(friends::contains))
-                    .findFirst()
-                    .orElse(null));
-        }
-
-        @Override
-        public List<UUID> getResult() {
-            if (userId == null) {
-                return List.of();
-            } else {
-                return List.of(userId);
-            }
-        }
-
-        public static ValidUserPageHandler forVisitedUsersAndFriends(Set<UUID> visitedUsers, Set<UUID> friends) {
-            return new ValidUserPageHandler(null, visitedUsers, friends);
         }
     }
 }

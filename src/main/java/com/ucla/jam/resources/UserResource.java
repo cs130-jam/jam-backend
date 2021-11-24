@@ -7,6 +7,7 @@ import com.ucla.jam.user.UnknownUserException;
 import com.ucla.jam.user.User;
 import com.ucla.jam.user.User.UserView;
 import com.ucla.jam.user.UserManager;
+import com.ucla.jam.util.Distance;
 import com.ucla.jam.util.Location;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -31,7 +32,7 @@ public class UserResource {
                 .orElseThrow(UnknownUserException::new);
     }
 
-    @PostMapping(value = "user", consumes = APPLICATION_JSON_VALUE)
+    @PutMapping(value = "user/profile", consumes = APPLICATION_JSON_VALUE)
     public void setSessionUserInfo(@RequestBody UserProfileUpdate update, @SessionFromHeader SessionInfo sessionInfo) {
         User user = userManager.getUser(sessionInfo.getUserId())
                 .orElseThrow(UnknownUserException::new);
@@ -42,6 +43,13 @@ public class UserResource {
     public UserView getUser(@PathVariable UUID userId) {
         return UserView.ofUser(userManager.getUser(userId)
                 .orElseThrow(UnknownUserException::new));
+    }
+
+    @PutMapping(value = "user/preferences", consumes = APPLICATION_JSON_VALUE)
+    public void updatePreferences(@RequestBody UserPreferencesUpdate update, @SessionFromHeader SessionInfo sessionInfo) {
+        User user = userManager.getUser(sessionInfo.getUserId())
+                .orElseThrow(UnknownUserException::new);
+        userManager.updateUserPreferences(user, update.toPreferences(user.getPreferences()));
     }
 
     @GetMapping(value = "/user/choices/instruments", produces = APPLICATION_JSON_VALUE)
@@ -70,6 +78,19 @@ public class UserResource {
                     existingProfile.getPfpUrl(),
                     musicInterests,
                     instruments
+            );
+        }
+    }
+
+    @Value
+    private static class UserPreferencesUpdate {
+        Distance maxDistance;
+        List<User.Instrument> wantedInstruments;
+
+        public User.Preferences toPreferences(User.Preferences existingPreferences) {
+            return new User.Preferences(
+                    maxDistance,
+                    wantedInstruments
             );
         }
     }
