@@ -60,6 +60,13 @@ public class UserResource {
                 .collect(toList());
     }
 
+    @GetMapping(value = "/user/choices/maxDistance/units", produces = APPLICATION_JSON_VALUE)
+    public List<String> maxDistanceUnits() {
+        return Arrays.stream(Distance.Unit.values())
+                .map(unit -> unit.name)
+                .collect(toList());
+    }
+
     @Value
     private static class UserProfileUpdate {
         String firstName;
