@@ -31,4 +31,8 @@ public class UserManager {
         recommendationService.updateUser(user, profile);
         userRepository.insert(user.withProfile(profile));
     }
+
+    public void updateUserPreferences(User user, User.Preferences preferences) {
+        userRepository.insert(user.withPreferences(preferences));
+    }
 }
