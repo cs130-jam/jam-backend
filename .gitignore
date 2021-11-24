@@ -35,10 +35,8 @@ build/
 application.properties
 jooq-codegen.xml
 /src/main/java/generated
-
-yashjooq.sh
-edmund-jooq.sh
-andrew-jooq.sh
+/.run/Create Tables.run.xml
+/.run/My Create Tables.run.xml
 
 Rec_service/venv
 Rec_service/__pycache__
