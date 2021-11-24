@@ -20,8 +20,9 @@ CREATE TABLE notifications (
     userId CHAR(36) NOT NULL,
     title TEXT NOT NULL,
     at BIGINT NOT NULL,
-    accept TEXT,
-    reject TEXT,
+    data TEXT,
+    canAccept BOOLEAN,
+    canReject BOOLEAN,
     PRIMARY KEY (id, userId)
 );
 

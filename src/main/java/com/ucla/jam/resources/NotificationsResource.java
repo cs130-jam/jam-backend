@@ -34,17 +34,31 @@ public class NotificationsResource {
         notificationManager.removeNotification(id, sessionInfo.getUserId());
     }
 
+    @PostMapping(value = "/notifications/{id}/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void acceptNotification(@PathVariable UUID id, @SessionFromHeader SessionInfo sessionInfo) {
+        notificationManager.acceptNotification(id, sessionInfo.getUserId());
+    }
+
+    @PostMapping(value = "/notifications/{id}/reject")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectNotification(@PathVariable UUID id, @SessionFromHeader SessionInfo sessionInfo) {
+        notificationManager.rejectNotification(id, sessionInfo.getUserId());
+    }
+
     @Value
     private static class NotificationEntry {
+        UUID id;
         String title;
-        Notification.Action accept;
-        Notification.Action reject;
+        boolean canAccept;
+        boolean canReject;
 
         public static NotificationEntry fromNotification(Notification notification) {
             return new NotificationEntry(
+                    notification.getId(),
                     notification.getTitle(),
-                    notification.getAccept(),
-                    notification.getReject());
+                    notification.isCanAccept(),
+                    notification.isCanReject());
         }
     }
 }

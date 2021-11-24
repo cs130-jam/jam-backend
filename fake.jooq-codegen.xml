@@ -3,7 +3,7 @@
     <jdbc>
         <driver>com.mysql.cj.jdbc.Driver</driver>
         <url>jdbc:mysql://localhost:3306/jam</url>
-        <user>debian-sys-maint</user>
+        <user></user>
         <password></password>
     </jdbc>
 
@@ -36,7 +36,9 @@
                         .*\.chats\.room|
                         .*\.chats\.user|
                         .*\.visited_recs\.userId|
-                        .*\.visited_recs\.targetId
+                        .*\.visited_recs\.targetId|
+                        .*\.notifications\.userId|
+                        .*\.notifications\.id
                     </includeExpression>
                     <includeTypes>CHAR\(36\)</includeTypes>
                 </forcedType>
@@ -45,7 +47,8 @@
                     <converter>com.ucla.jam.util.jooq.InstantConverter</converter>
                     <includeExpression>
                         .*\.chatrooms\.updated|
-                        .*\.chats\.at
+                        .*\.chats\.at|
+                        .*\.notifications\.at
                     </includeExpression>
                     <includeTypes>BIGINT</includeTypes>
                 </forcedType>
@@ -66,6 +69,12 @@
                     <converter>com.ucla.jam.chat.Chatroom.Info.Converter</converter>
                     <includeExpression>.*\.chatrooms\.info</includeExpression>
                     <includeTypes>TEXT</includeTypes>
+                </forcedType>
+                <forcedType>
+                    <userType>com.ucla.jam.notifications.Notification.Kind</userType>
+                    <enumConverter>true</enumConverter>
+                    <includeExpression>.*\.notifications\.kind</includeExpression>
+                    <includeTypes>.*</includeTypes>
                 </forcedType>
                 <forcedType>
                     <name>BOOLEAN</name>

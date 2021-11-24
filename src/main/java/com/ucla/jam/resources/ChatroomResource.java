@@ -78,12 +78,6 @@ public class ChatroomResource {
          chatManager.uninviteFromChatroom(roomId, sessionInfo.getUserId(), userId);
     }
 
-    @PostMapping(value = "/chatroom/{roomId}/reject")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void rejectInvite(@PathVariable UUID roomId, @SessionFromHeader SessionInfo sessionInfo) {
-        chatManager.rejectInvite(roomId, sessionInfo.getUserId());
-    }
-
     @DeleteMapping(value = "/chatroom/{roomId}/members/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeUser(@PathVariable UUID roomId, @PathVariable UUID userId, @SessionFromHeader SessionInfo sessionInfo) {
