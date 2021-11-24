@@ -4,6 +4,7 @@ import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.music.ResultHandler;
 import com.ucla.jam.music.responses.ArtistReleaseResponse;
+import com.ucla.jam.music.responses.MasterResourceResponse;
 import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.recommendation.responses.GetRecommendationsResponse;
 import com.ucla.jam.user.User;
@@ -22,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
+import static com.ucla.jam.util.Futures.sneakyGet;
 import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -56,23 +58,19 @@ public class RecommendationService {
     }
 
     private void insertUser(UUID userId, User.Profile profile, CompletableFuture<Void> complete) {
-        List<ArtistReleaseResponse.Release> allMasters = profile.getMusicInterests().stream()
-                .map(MusicInterest::getPath)
-                .map(discogsService::artistReleases)
+        List<String> masterUrls = profile.getMusicInterests().stream()
+                .map(MusicInterest::getName)
+                .map(discogsService::artistMasterUrls)
                 .map(Futures::sneakyGet)
-                .map(releases -> {
-                    List<ArtistReleaseResponse.Release> masters = releases.stream()
-                            .filter(release -> release.getType().equals(MASTER))
-                            .collect(toList());
-                    Collections.shuffle(masters);
-                    return masters.subList(0, mastersSampleSize);
-                })
+                .map(urls -> urls.subList(0, Math.min(mastersSampleSize, urls.size())))
                 .flatMap(Collection::stream)
                 .collect(toList());
-        log.info("Got masters: {}", allMasters);
-        Map<Style, Integer> stylesMap = allMasters.stream()
-                .map(discogsService::masterStyles)
+        log.info("Getting {} masters", masterUrls.size());
+        Map<Style, Integer> stylesMap = masterUrls.stream()
+                .map(discogsService::getMaster)
                 .map(Futures::sneakyGet)
+                .map(MasterResourceResponse::getStyles)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(toMap(identity(), style -> 1, Integer::sum));
         log.info("Got style map: {}", stylesMap);

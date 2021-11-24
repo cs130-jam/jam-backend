@@ -26,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 public class DiscogsService {
 
     private static final String ARTIST_SEARCH_TYPE = "artist";
+    private static final String MASTER_SEARCHT_TYPE = "master";
     private final DiscogsWebClientProvider webClientProvider;
     private final int maxItemCount;
 
@@ -49,39 +50,41 @@ public class DiscogsService {
         return artistSearch(artist, 1);
     }
 
-    public Future<List<ArtistReleaseResponse.Release>> artistReleases(String artistUrl) {
-        CompletableFuture<List<ArtistReleaseResponse.Release>> future = new CompletableFuture<>();
+    public Future<List<String>> artistMasterUrls(String artistName) {
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
         accumulatingPaginatedRequest(
-                new ArtistReleasesRequest(artistUrl),
+                new SearchRequest(artistName, MASTER_SEARCHT_TYPE),
                 maxItemCount,
                 new ResultHandler<>() {
                     @Override
-                    public void completed(List<ArtistReleaseResponse.Release> releases) {
-                        future.complete(releases);
+                    public void completed(List<SearchResponse.Result> results) {
+                        future.complete(results.stream()
+                                .filter(searchResult -> searchResult.getTitle().toLowerCase().startsWith(artistName.toLowerCase()))
+                                .map(SearchResponse.Result::getResource_url)
+                                .collect(toList()));
                     }
 
                     @Override
                     public void failed(Throwable error) {
                         future.completeExceptionally(error);
                     }
-                });
+                }
+        );
         return future;
     }
 
-    public Future<List<Style>> masterStyles(ArtistReleaseResponse.Release master) {
-        CompletableFuture<List<Style>> future = new CompletableFuture<>();
+    public Future<MasterResourceResponse> getMaster(String masterUrl) {
+        CompletableFuture<MasterResourceResponse> future = new CompletableFuture<>();
         webClientProvider.get()
                 .get()
-                .uri(master.getResource_url())
+                .uri(masterUrl)
                 .retrieve()
                 .bodyToMono(MasterResourceResponse.class)
                 .onErrorResume(error -> {
-                    log.error("Failed to fetch master resource, {}", error.getMessage());
+                    future.completeExceptionally(error);
                     return Mono.empty();
                 })
-                .subscribe(masterResource -> future.complete(
-                        Optional.ofNullable(masterResource.getStyles())
-                                .orElseGet(List::of)));
+                .subscribe(future::complete);
         return future;
     }
 
@@ -98,6 +101,7 @@ public class DiscogsService {
                             .queryParam("type", type)
                             .queryParam("page", page)
                             .queryParam("per_page", 100)
+                            .queryParam("sort", "have,desc")
                             .build()
                             .toUriString())
                     .retrieve()

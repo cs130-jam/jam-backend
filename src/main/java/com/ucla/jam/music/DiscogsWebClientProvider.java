@@ -4,7 +4,9 @@ import io.netty.handler.ssl.SslContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
@@ -17,6 +19,7 @@ import java.util.List;
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Slf4j
 @RequiredArgsConstructor
 public class DiscogsWebClientProvider {
 
@@ -30,7 +33,7 @@ public class DiscogsWebClientProvider {
 
     private List<Instant> reqs = new ArrayList<>();
     private final int maxReqs = 60;
-    private final Duration maxReqsTimespan = Duration.ofMinutes(1);
+    private final Duration maxReqsTimespan = Duration.ofMinutes(2);
 
     @SneakyThrows
     public synchronized WebClient get() {
@@ -39,9 +42,10 @@ public class DiscogsWebClientProvider {
             removeEarliestReq();
         }
         if (reqs.size() >= maxReqs) {
-            Thread.sleep(Duration.between(minuteAgo, reqs.get(maxReqs - 1)).toMillis());
+            Thread.sleep(Duration.between(minuteAgo, reqs.get(maxReqs - 1)).toMillis() + 500);
         }
         insertReq(clock.instant());
+        System.out.println("ba");
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .secure(t -> t.sslContext(context))))
@@ -51,6 +55,11 @@ public class DiscogsWebClientProvider {
                     httpHeaders.add(USER_AGENT, userAgent);
                     httpHeaders.add(AUTHORIZATION, "Discogs " + TOKEN_HEADER_KEY + "=" + token);
                 })
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                                .defaultCodecs()
+                                .maxInMemorySize(1000000)) // 1mb
+                        .build())
                 .build();
     }
 
