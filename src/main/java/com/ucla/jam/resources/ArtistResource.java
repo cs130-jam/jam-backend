@@ -1,11 +1,7 @@
 package com.ucla.jam.resources;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import com.ucla.jam.music.DiscogsService;
-import com.ucla.jam.music.SearchException;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
-import com.ucla.jam.music.responses.Style;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
+import static com.ucla.jam.util.Futures.sneakyGet;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,18 +23,10 @@ public class ArtistResource {
 
     @GetMapping(value = "/artist/search", produces = APPLICATION_JSON_VALUE)
     public QueryResponse search(@RequestParam String artist, @RequestParam(required = false) Integer page) {
-        try {
-            if (page == null) {
-                return discogsService.artistSearch(artist).get();
-            } else {
-                return discogsService.artistSearch(artist, page).get();
-            }
-        } catch (InterruptedException e) {
-            log.error("Future interrupted for artist search {}, error: {}", artist, e.toString());
-            throw new SearchException();
-        } catch (ExecutionException e) {
-            log.error("Future execution failed for artist search {}, error: {}", artist, e.toString());
-            throw new SearchException();
+        if (page == null) {
+            return sneakyGet(discogsService.artistSearch(artist));
+        } else {
+            return sneakyGet(discogsService.artistSearch(artist, page));
         }
     }
 

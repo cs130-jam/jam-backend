@@ -56,10 +56,11 @@ def get_match():
     uid = request.args.get("uid")
 
     user_interests = get_user_interests(uid)
-    if user_interests is None:
+    dfsql = pd.read_sql_query("SELECT uid, interests FROM user_interests WHERE uid!=%s", connection, params=[uid])
+
+    if user_interests is None or dfsql.shape[0] == 0:
         return GetMatchesResponse(0, []).__dict__, 200
 
-    dfsql = pd.read_sql_query("SELECT uid, interests FROM user_interests WHERE uid!=%s", connection, params=[uid])
     genres_table = pd.DataFrame(dfsql["interests"].apply(json.loads).tolist())
     knn = NearestNeighbors(n_neighbors=genres_table.shape[0]).fit(genres_table)
 
@@ -79,6 +80,18 @@ def get_user_interests(uid):
 
         user_interests_table = pd.DataFrame([json.loads(user_interests[0])])
         return user_interests_table
+
+
+@app.route('/user_exists', methods=['GET'])
+def user_exists():
+    uid = request.args.get('uid')
+    with connection.cursor() as cursor:
+        sql_query = "SELECT uid FROM user_interests WHERE uid=%s"
+        cursor.execute(sql_query, uid)
+        if cursor.fetchone() is None:
+            return '', 422
+        else:
+            return '', 204
 
 
 if __name__ == '__main__':

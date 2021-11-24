@@ -1,11 +1,12 @@
 package com.ucla.jam.resources;
 
-import com.ucla.jam.friends.FriendManager;
 import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
-import com.ucla.jam.music.SearchException;
 import com.ucla.jam.recommendation.RecommendationService;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
+import com.ucla.jam.user.UnknownUserException;
+import com.ucla.jam.user.User;
+import com.ucla.jam.user.UserManager;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
+import static com.ucla.jam.util.Futures.sneakyGet;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -24,18 +25,13 @@ public class RecommendationResource {
 
     private final RecommendationService recommendationService;
     private final FriendManagerFactory friendManagerFactory;
+    private final UserManager userManager;
 
     @GetMapping(value = "match", produces = APPLICATION_JSON_VALUE)
     public UserIdToken getRec(@SessionFromHeader SessionInfo sessionInfo) {
-        try {
-            return new UserIdToken(recommendationService.getRecommendation(sessionInfo.getUserId()).get());
-        } catch (InterruptedException e) {
-            log.error("Future interrupted for user recommendation {}, error: {}", sessionInfo.getUserId(), e.toString());
-            throw new SearchException();
-        } catch (ExecutionException e) {
-            log.error("Future execution failed for user recommendation{}, error: {}", sessionInfo.getUserId(), e.toString());
-            throw new SearchException();
-        }
+        User user = userManager.getUser(sessionInfo.getUserId())
+                .orElseThrow(UnknownUserException::new);
+        return new UserIdToken(sneakyGet(recommendationService.getRecommendation(user)));
     }
 
     @PostMapping(value = "match/accept", consumes = APPLICATION_JSON_VALUE)

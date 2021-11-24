@@ -54,11 +54,13 @@ public class RecommendationService {
         }
     }
 
-    private void triggerInsertUser(UUID userId, User.Profile profile) {
-        new Thread(() -> insertUser(userId, profile)).start();
+    private CompletableFuture<Void> triggerInsertUser(UUID userId, User.Profile profile) {
+        CompletableFuture<Void> complete = new CompletableFuture<>();
+        new Thread(() -> insertUser(userId, profile, complete)).start();
+        return complete;
     }
 
-    private void insertUser(UUID userId, User.Profile profile) {
+    private void insertUser(UUID userId, User.Profile profile, CompletableFuture<Void> complete) {
         List<ArtistReleaseResponse.Release> allMasters = profile.getMusicInterests().stream()
                 .map(MusicInterest::getPath)
                 .map(discogsService::artistReleases)
@@ -85,36 +87,84 @@ public class RecommendationService {
                 .retrieve()
                 .onStatus(status -> !HttpStatus.NO_CONTENT.equals(status), clientResponse -> {
                     log.error("Failed to insert user to rec service, {}", clientResponse);
+                    complete.completeExceptionally(new FailedInsertException());
                     return Mono.empty();
                 })
                 .toBodilessEntity()
-                .subscribe(entity -> log.info("Got status code = {}", entity.getStatusCode()));
+                .subscribe(entity -> complete.complete(null));
     }
 
     public void markVisited(UUID sourceUser, UUID targetUser) {
         visitedRepository.markVisited(sourceUser, targetUser);
     }
 
-    public Future<UUID> getRecommendation(UUID userId) {
+    public Future<UUID> getRecommendation(User user) {
         CompletableFuture<UUID> future = new CompletableFuture<>();
-        paginatedRequest(
-                new RecommendationRequest(userId),
-                ValidUserPageHandler.forVisitedUsersAndFriends(
-                        Set.copyOf(visitedRepository.getVisited(userId)),
-                        Set.copyOf(friendManagerFactory.forUser(userId).getFriends())),
-                new ResultHandler<>() {
-                    @Override
-                    public void completed(List<UUID> result) {
-                        future.complete(result.get(0));
-                    }
+        ensureUser(user).thenAccept(success -> {
+            if (success) {
+                paginatedRequest(
+                        new RecommendationRequest(user.getId()),
+                        ValidUserPageHandler.forVisitedUsersAndFriends(
+                                Set.copyOf(visitedRepository.getVisited(user.getId())),
+                                Set.copyOf(friendManagerFactory.forUser(user.getId()).getFriends())),
+                        new ResultHandler<>() {
+                            @Override
+                            public void completed(List<UUID> result) {
+                                if (result.size() == 0) {
+                                    future.completeExceptionally(new NoRecommendationFoundException());
+                                } else {
+                                    future.complete(result.get(0));
+                                }
+                            }
 
-                    @Override
-                    public void failed(Throwable error) {
-                        future.completeExceptionally(error);
-                    }
-                }
-        );
+                            @Override
+                            public void failed(Throwable error) {
+                                future.completeExceptionally(error);
+                            }
+                        }
+                );
+            } else {
+                future.completeExceptionally(new FailedInsertException());
+            }
+        });
         return future;
+    }
+
+    private CompletableFuture<Boolean> ensureUser(User user) {
+        CompletableFuture<Boolean> exists = new CompletableFuture<>();
+        ensureUser(user, true, exists);
+        return exists;
+    }
+
+    private void ensureUser(User user, boolean tryInsert, CompletableFuture<Boolean> exists) {
+        webClientProvider.get()
+                .get()
+                .uri(UriComponentsBuilder.fromUriString("user_exists")
+                        .queryParam("uid", user.getId().toString())
+                        .build()
+                        .toUriString())
+                .retrieve()
+                .onStatus(status -> status.equals(HttpStatus.NO_CONTENT), ignored -> {
+                    exists.complete(true);
+                    return Mono.empty();
+                })
+                .onStatus(status -> status.equals(HttpStatus.UNPROCESSABLE_ENTITY), ignored -> {
+                    if (tryInsert) {
+                        triggerInsertUser(user.getId(), user.getProfile())
+                                .thenAccept(ignore -> ensureUser(user, false, exists))
+                                .handle((_ignored, error) -> {
+                                    log.error("Failed to ensure user, {}", error.getMessage());
+                                    exists.complete(false);
+                                    return null;
+                                });
+                    } else {
+                        exists.complete(false);
+                    }
+                    return Mono.empty();
+                })
+                .toBodilessEntity()
+                .doOnError(ignored -> exists.complete(false))
+                .subscribe();
     }
 
     @Value
@@ -164,9 +214,10 @@ public class RecommendationService {
         @Override
         public List<UUID> getResult() {
             if (userId == null) {
-                throw new NoRecommendationFoundException();
+                return List.of();
+            } else {
+                return List.of(userId);
             }
-            return List.of(userId);
         }
 
         public static ValidUserPageHandler forVisitedUsersAndFriends(Set<UUID> visitedUsers, Set<UUID> friends) {

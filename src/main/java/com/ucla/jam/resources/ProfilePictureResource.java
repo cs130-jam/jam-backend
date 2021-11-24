@@ -51,7 +51,6 @@ public class ProfilePictureResource {
             }
 
             String filename = Paths.get(staticContentPath, userId.toString()) + "." + extension;
-            log.info("url = {}", "http://localhost/static/" + userId + "." + extension);
             image.transferTo(new File(filename));
             // sometimes MultipartFile is stored in a temp file, sometimes in memory. I hope that the temp file is
             // deleted automatically, because I can't get Spring to put it in the temp file for testing purposes :/

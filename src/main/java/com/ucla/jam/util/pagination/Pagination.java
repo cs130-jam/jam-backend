@@ -47,7 +47,7 @@ public class Pagination {
                 .onErrorResume(error -> Mono.empty())
                 .subscribe(response -> {
                     if (response.getPagination().getTotalPages() < page) {
-                        throw new NoPagesRemainingException();
+                        handler.failed(new NoPagesRemainingException());
                     }
                     PageHandler<I> nextHandler = pageHandler.handle(response.getItems());
                     if (page == response.getPagination().getTotalPages() || nextHandler.isFinished()) {

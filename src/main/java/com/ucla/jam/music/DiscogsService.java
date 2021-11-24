@@ -57,7 +57,6 @@ public class DiscogsService {
                 new ResultHandler<>() {
                     @Override
                     public void completed(List<ArtistReleaseResponse.Release> releases) {
-                        log.info("Got releases {} for {}", releases.size(), artistUrl);
                         future.complete(releases);
                     }
 
@@ -80,11 +79,9 @@ public class DiscogsService {
                     log.error("Failed to fetch master resource, {}", error.getMessage());
                     return Mono.empty();
                 })
-                .subscribe(masterResource -> {
-                    log.info("Got styles for {}: {}", masterResource.getTitle(), masterResource.getStyles());
-                    future.complete(Optional.ofNullable(masterResource.getStyles())
-                            .orElseGet(List::of));
-                });
+                .subscribe(masterResource -> future.complete(
+                        Optional.ofNullable(masterResource.getStyles())
+                                .orElseGet(List::of)));
         return future;
     }
 
