@@ -1,6 +1,5 @@
 package com.ucla.jam.resources;
 
-import com.google.common.collect.ImmutableSet;
 import com.ucla.jam.chat.ChatManager;
 import com.ucla.jam.chat.Chatroom;
 import com.ucla.jam.session.SessionFromHeader;
