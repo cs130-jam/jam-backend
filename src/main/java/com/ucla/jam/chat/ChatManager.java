@@ -2,7 +2,6 @@ package com.ucla.jam.chat;
 
 import com.google.common.collect.ImmutableSet;
 import com.ucla.jam.chat.chatroom.*;
-import com.ucla.jam.notifications.NotificationManager;
 import com.ucla.jam.ws.WebSocketManager;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,6 @@ public class ChatManager {
     private final ChatroomRepository chatroomRepository;
     private final ChatroomInviteRepository inviteRepository;
     private final ChatRepository chatRepository;
-    private final List<ChatroomInviteListener> inviteListeners;
     private final WebSocketManager webSocketManager;
     private final Clock clock;
     private final String defaultGroupPicUrl = "https://static.thenounproject.com/png/58999-200.png";
@@ -106,7 +104,6 @@ public class ChatManager {
         if (!hasChatroom(sourceId, roomId)) {
             throw new NotMemberException();
         }
-        inviteListeners.forEach(listener -> listener.invitedToGroup(sourceId, targetId, roomId));
         inviteRepository.inviteUser(sourceId, targetId, roomId);
     }
 

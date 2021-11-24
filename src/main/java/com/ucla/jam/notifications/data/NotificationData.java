@@ -2,6 +2,8 @@ package com.ucla.jam.notifications.data;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.ucla.jam.notifications.data.friendrequest.FriendRequestNotificationData;
+import com.ucla.jam.notifications.data.groupinvite.GroupInviteNotificationData;
 import com.ucla.jam.util.jooq.JsonConverter;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")

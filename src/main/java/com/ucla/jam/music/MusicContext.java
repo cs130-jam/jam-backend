@@ -18,14 +18,15 @@ public class MusicContext {
     public DiscogsWebClientProvider webClientProvider(
             @Value("${discogs.api.base.url}") String baseUrl,
             @Value("${discogs.api.user.agent}") String userAgent,
-            @Value("${discogs.api.user.token}") String token
+            @Value("${discogs.api.user.token}") String token,
+            Clock clock
     ) {
         return new DiscogsWebClientProvider(
                 baseUrl,
                 userAgent,
                 token,
                 SslContextBuilder.forClient().build(),
-                Clock.systemUTC());
+                clock);
     }
 
     @Bean

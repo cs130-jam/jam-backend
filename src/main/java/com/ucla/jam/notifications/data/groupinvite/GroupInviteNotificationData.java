@@ -1,5 +1,6 @@
-package com.ucla.jam.notifications.data;
+package com.ucla.jam.notifications.data.groupinvite;
 
+import com.ucla.jam.notifications.data.NotificationData;
 import lombok.Value;
 
 import java.util.UUID;

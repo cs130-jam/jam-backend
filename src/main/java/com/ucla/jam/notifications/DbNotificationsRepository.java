@@ -41,9 +41,9 @@ public class DbNotificationsRepository implements NotificationsRepository {
                 record.getId(),
                 record.getUserid(),
                 record.getTitle(),
-                record.getKind(),
-                record.getAccept(),
-                record.getReject(),
+                record.getData(),
+                record.getCanaccept(),
+                record.getCanreject(),
                 record.getAt());
     }
 
@@ -52,9 +52,9 @@ public class DbNotificationsRepository implements NotificationsRepository {
                 notification.getId(),
                 notification.getUserId(),
                 notification.getTitle(),
-                notification.getKind(),
                 notification.getAt(),
-                notification.getAccept(),
-                notification.getReject());
+                notification.getData(),
+                notification.isCanAccept(),
+                notification.isCanReject());
     }
 }
