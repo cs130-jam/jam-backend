@@ -9,6 +9,7 @@ import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class ChatroomResource {
     @GetMapping(value = "/chatrooms", produces = APPLICATION_JSON_VALUE)
     public List<UUID> getUserChatrooms(@SessionFromHeader SessionInfo sessionInfo) {
         return chatManager.userChatrooms(sessionInfo.getUserId()).stream()
+                .sorted(Comparator.comparing(Chatroom::getUpdated).reversed())
                 .map(Chatroom::getId)
                 .collect(toList());
     }
