@@ -71,10 +71,10 @@
                     <includeTypes>TEXT</includeTypes>
                 </forcedType>
                 <forcedType>
-                    <userType>com.ucla.jam.notifications.Notification.Kind</userType>
-                    <enumConverter>true</enumConverter>
-                    <includeExpression>.*\.notifications\.kind</includeExpression>
-                    <includeTypes>.*</includeTypes>
+                    <userType>com.ucla.jam.notifications.data.NotificationData</userType>
+                    <converter>com.ucla.jam.notifications.data.NotificationData.Converter</converter>
+                    <includeExpression>.*\.notifications\.data</includeExpression>
+                    <includeTypes>TEXT</includeTypes>
                 </forcedType>
                 <forcedType>
                     <name>BOOLEAN</name>
