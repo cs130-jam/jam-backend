@@ -45,7 +45,6 @@ public class DiscogsWebClientProvider {
             Thread.sleep(Duration.between(minuteAgo, reqs.get(maxReqs - 1)).toMillis() + 500);
         }
         insertReq(clock.instant());
-        System.out.println("ba");
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
                         .secure(t -> t.sslContext(context))))
