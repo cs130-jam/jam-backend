@@ -79,6 +79,28 @@ public class ChatManager {
         return roomId;
     }
 
+    public UUID ensureDmChatroom(UUID userA, UUID userB) {
+        return userChatrooms(userA).stream()
+                .filter(Chatroom::isDirectMessage)
+                .filter(chatroom -> chatroom.getMembers().contains(userB))
+                .findAny()
+                .map(Chatroom::getId)
+                .orElseGet(() -> createDmChatroom(userA, userB));
+    }
+
+    private UUID createDmChatroom(UUID userA, UUID userB) {
+        UUID roomId = UUID.randomUUID();
+        Chatroom chatroom = new Chatroom(
+                roomId,
+                Set.of(userA, userB),
+                clock.instant(),
+                true,
+                null);
+        chatroomRepository.insert(chatroom);
+        chatroom.getMembers().forEach(member -> chatroomRepository.insertMember(roomId, member));
+        return roomId;
+    }
+
     public void joinChatroom(UUID userId, UUID roomId) {
         if (!inviteRepository.getAll(userId).contains(roomId)) {
             throw new NoInviteException();
@@ -92,17 +114,25 @@ public class ChatManager {
             throw new NotMemberException();
         }
         Chatroom chatroom = getChatroomIfMember(userId, roomId);
-        if (chatroom.getInfo() == null || chatroom.getInfo().getAdmin().equals(userId)) {
+        if (chatroom.isDirectMessage() || chatroom.getInfo() == null) {
+            throw new DirectChatroomException();
+        }
+        if (chatroom.getInfo().getAdmin().equals(userId)) {
             throw new IsAdminException();
         }
         chatroomRepository.removeMember(roomId, userId);
     }
 
     public void inviteToChatroom(UUID roomId, UUID sourceId, UUID targetId) {
-        if (hasChatroom(targetId, roomId)) {
+        Chatroom chatroom = chatroomRepository.get(roomId)
+                .orElseThrow(UnknownChatroomException::new);
+        if (chatroom.isDirectMessage()) {
+            throw new DirectChatroomException();
+        }
+        if (chatroom.getMembers().contains(targetId)) {
             throw new AlreadyMemberException();
         }
-        if (!hasChatroom(sourceId, roomId)) {
+        if (!chatroom.getMembers().contains(sourceId)) {
             throw new NotMemberException();
         }
         groupInviteListeners.forEach(listener -> listener.invitedToGroup(sourceId, targetId, roomId));
@@ -125,7 +155,10 @@ public class ChatManager {
 
     public void removeFromChatroom(UUID roomId, UUID sourceId, UUID targetId) {
         Chatroom chatroom = getChatroomIfMember(sourceId, roomId);
-        if (chatroom.isDirectMessage() || chatroom.getInfo() == null || !chatroom.getInfo().getAdmin().equals(sourceId)) {
+        if (chatroom.isDirectMessage() || chatroom.getInfo() == null) {
+            throw new DirectChatroomException();
+        }
+        if (!chatroom.getInfo().getAdmin().equals(sourceId)) {
             throw new NotAdminException();
         }
         leaveChatroom(targetId, roomId);

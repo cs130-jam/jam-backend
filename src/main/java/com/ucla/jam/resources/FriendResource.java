@@ -56,7 +56,7 @@ public class FriendResource {
     }
 
     @Value
-    public static class Requests {
+    private static class Requests {
         List<UUID> outgoing;
         List<UUID> incoming;
     }

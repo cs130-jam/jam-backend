@@ -1,5 +1,6 @@
 package com.ucla.jam.resources;
 
+import com.ucla.jam.chat.ChatManager;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
@@ -25,6 +26,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class UserResource {
 
     private final UserManager userManager;
+    private final ChatManager chatManager;
 
     @GetMapping(value = "user", produces = APPLICATION_JSON_VALUE)
     public User getSessionUser(@SessionFromHeader SessionInfo sessionInfo) {
@@ -43,6 +45,11 @@ public class UserResource {
     public UserView getUser(@PathVariable UUID userId) {
         return UserView.ofUser(userManager.getUser(userId)
                 .orElseThrow(UnknownUserException::new));
+    }
+
+    @GetMapping(value = "user/{userId}/chatroom", produces = APPLICATION_JSON_VALUE)
+    public ChatroomIdResponse getDmChatroom(@PathVariable UUID userId, @SessionFromHeader SessionInfo sessionInfo) {
+        return new ChatroomIdResponse(chatManager.ensureDmChatroom(sessionInfo.getUserId(), userId));
     }
 
     @PutMapping(value = "user/preferences", consumes = APPLICATION_JSON_VALUE)
@@ -100,5 +107,10 @@ public class UserResource {
                     wantedInstruments
             );
         }
+    }
+
+    @Value
+    private static class ChatroomIdResponse {
+        UUID roomId;
     }
 }
