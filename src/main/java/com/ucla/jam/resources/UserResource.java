@@ -49,6 +49,9 @@ public class UserResource {
 
     @GetMapping(value = "user/{userId}/chatroom", produces = APPLICATION_JSON_VALUE)
     public ChatroomIdResponse getDmChatroom(@PathVariable UUID userId, @SessionFromHeader SessionInfo sessionInfo) {
+        if (userManager.getUser(userId).isEmpty()) {
+            throw new UnknownUserException();
+        }
         return new ChatroomIdResponse(chatManager.ensureDmChatroom(sessionInfo.getUserId(), userId));
     }
 
