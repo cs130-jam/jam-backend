@@ -1,6 +1,6 @@
 package com.ucla.jam.notifications;
 
-import com.ucla.jam.chat.Chatroom;
+import com.ucla.jam.chat.chatroom.Chatroom;
 import com.ucla.jam.chat.chatroom.ChatroomRepository;
 import com.ucla.jam.chat.chatroom.GroupInviteListener;
 import com.ucla.jam.chat.chatroom.UnknownChatroomException;

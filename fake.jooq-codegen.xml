@@ -65,8 +65,8 @@
                     <includeTypes>TEXT</includeTypes>
                 </forcedType>
                 <forcedType>
-                    <userType>com.ucla.jam.chat.Chatroom.Info</userType>
-                    <converter>com.ucla.jam.chat.Chatroom.Info.Converter</converter>
+                    <userType>com.ucla.jam.chat.chatroom.Chatroom.Info</userType>
+                    <converter>com.ucla.jam.chat.chatroom.Chatroom.Info.Converter</converter>
                     <includeExpression>.*\.chatrooms\.info</includeExpression>
                     <includeTypes>TEXT</includeTypes>
                 </forcedType>

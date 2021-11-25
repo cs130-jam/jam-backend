@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.ucla.jam.chat.chatroom.*;
 import com.ucla.jam.ws.WebSocketManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ChatManager {
 
@@ -81,6 +83,7 @@ public class ChatManager {
 
     public UUID ensureDmChatroom(UUID userA, UUID userB) {
         return userChatrooms(userA).stream()
+                .peek(room -> log.info("room {}", room))
                 .filter(Chatroom::isDirectMessage)
                 .filter(chatroom -> chatroom.getMembers().contains(userB))
                 .findAny()
@@ -89,6 +92,8 @@ public class ChatManager {
     }
 
     private UUID createDmChatroom(UUID userA, UUID userB) {
+        log.info("creating for {} and {}", userA, userB);
+        if (userA.equals(userB)) return null;
         UUID roomId = UUID.randomUUID();
         Chatroom chatroom = new Chatroom(
                 roomId,

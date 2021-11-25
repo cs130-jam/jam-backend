@@ -1,7 +1,7 @@
 package com.ucla.jam.resources;
 
 import com.ucla.jam.chat.ChatManager;
-import com.ucla.jam.chat.Chatroom;
+import com.ucla.jam.chat.chatroom.Chatroom;
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
 import lombok.RequiredArgsConstructor;
