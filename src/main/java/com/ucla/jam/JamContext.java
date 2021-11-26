@@ -57,7 +57,9 @@ public class JamContext {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(allowedOrigin);
+                registry.addMapping("/**")
+                        .allowedOrigins(allowedOrigin)
+                        .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE");
             }
         };
     }
