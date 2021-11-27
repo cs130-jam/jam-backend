@@ -4,7 +4,6 @@ import com.ucla.jam.music.responses.ArtistReleaseResponse;
 import com.ucla.jam.music.responses.MasterResourceResponse;
 import com.ucla.jam.music.responses.SearchResponse;
 import com.ucla.jam.music.responses.SearchResponse.ArtistView;
-import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.resources.ArtistResource;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 

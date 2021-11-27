@@ -3,9 +3,7 @@ package com.ucla.jam.user;
 import com.ucla.jam.recommendation.RecommendationContext;
 import com.ucla.jam.recommendation.RecommendationService;
 import com.ucla.jam.session.SessionTokenResolver;
-import com.ucla.jam.user.authentication.AggregatedCredentialsRepository;
 import com.ucla.jam.user.authentication.AuthenticationContext;
-import com.ucla.jam.user.authentication.AuthenticationManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 

@@ -1,8 +1,5 @@
 package com.ucla.jam.chat;
 
-import static generated.jooq.tables.Chats.CHATS;
-import static java.lang.Math.min;
-
 import generated.jooq.tables.records.ChatsRecord;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static generated.jooq.tables.Chats.CHATS;
+import static java.lang.Math.min;
 
 public class DbChatRepository implements ChatRepository {
 

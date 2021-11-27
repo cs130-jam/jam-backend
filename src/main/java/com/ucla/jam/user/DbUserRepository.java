@@ -1,13 +1,13 @@
 package com.ucla.jam.user;
 
-import static generated.jooq.tables.Users.USERS;
-
 import generated.jooq.tables.records.UsersRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static generated.jooq.tables.Users.USERS;
 
 @RequiredArgsConstructor
 public class DbUserRepository implements UserRepository {

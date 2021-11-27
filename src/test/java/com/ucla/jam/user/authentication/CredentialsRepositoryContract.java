@@ -1,10 +1,10 @@
 package com.ucla.jam.user.authentication;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class CredentialsRepositoryContract {
 

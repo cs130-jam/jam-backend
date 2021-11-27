@@ -1,8 +1,5 @@
 package com.ucla.jam.user.authentication;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import com.ucla.jam.session.SessionTokenResolver;
 import com.ucla.jam.util.ObjectMapperProvider;
 import org.junit.jupiter.api.Test;
@@ -10,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.UUID;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AuthenticationManagerUnitTest {
 

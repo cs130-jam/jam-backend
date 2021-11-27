@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.ucla.jam.chat.chatroom.*;
 import com.ucla.jam.ws.WebSocketManager;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.Clock;
 import java.time.Instant;

@@ -1,7 +1,5 @@
 package com.ucla.jam.recommendation;
 
-import com.ucla.jam.friends.FriendContext;
-import com.ucla.jam.friends.FriendManager.FriendManagerFactory;
 import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicContext;
 import org.springframework.beans.factory.annotation.Value;

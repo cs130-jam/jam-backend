@@ -1,13 +1,13 @@
 package com.ucla.jam.user.authentication;
 
-import static generated.jooq.Tables.INTERNAL_CREDENTIALS;
-
 import generated.jooq.tables.records.InternalCredentialsRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static generated.jooq.Tables.INTERNAL_CREDENTIALS;
 
 @RequiredArgsConstructor
 public class DbInternalCredentialsRepository implements CredentialsRepository {

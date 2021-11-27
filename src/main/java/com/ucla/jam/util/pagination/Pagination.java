@@ -1,7 +1,6 @@
 package com.ucla.jam.util.pagination;
 
 import com.ucla.jam.music.ResultHandler;
-import com.ucla.jam.recommendation.NoRecommendationFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 import reactor.core.publisher.Mono;

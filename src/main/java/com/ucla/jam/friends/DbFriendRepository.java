@@ -1,7 +1,5 @@
 package com.ucla.jam.friends;
 
-import static generated.jooq.Tables.FRIENDS;
-
 import generated.jooq.tables.records.FriendsRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -9,6 +7,8 @@ import org.jooq.DSLContext;
 
 import java.util.List;
 import java.util.UUID;
+
+import static generated.jooq.Tables.FRIENDS;
 
 @RequiredArgsConstructor
 public class DbFriendRepository implements FriendRepository {

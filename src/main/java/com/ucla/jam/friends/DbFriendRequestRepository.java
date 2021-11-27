@@ -1,13 +1,13 @@
 package com.ucla.jam.friends;
 
-import static generated.jooq.Tables.FRIEND_REQUESTS;
-
 import generated.jooq.tables.records.FriendRequestsRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 
 import java.util.List;
 import java.util.UUID;
+
+import static generated.jooq.Tables.FRIEND_REQUESTS;
 
 @RequiredArgsConstructor
 public class DbFriendRequestRepository implements FriendRequestRepository {

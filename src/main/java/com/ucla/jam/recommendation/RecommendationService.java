@@ -3,7 +3,6 @@ package com.ucla.jam.recommendation;
 import com.ucla.jam.music.DiscogsService;
 import com.ucla.jam.music.MusicInterest;
 import com.ucla.jam.music.ResultHandler;
-import com.ucla.jam.music.responses.ArtistReleaseResponse;
 import com.ucla.jam.music.responses.MasterResourceResponse;
 import com.ucla.jam.music.responses.Style;
 import com.ucla.jam.recommendation.responses.GetRecommendationsResponse;
@@ -22,8 +21,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static com.ucla.jam.music.responses.ArtistReleaseResponse.Type.MASTER;
-import static com.ucla.jam.util.Futures.sneakyGet;
 import static com.ucla.jam.util.pagination.Pagination.paginatedRequest;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;

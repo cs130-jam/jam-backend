@@ -1,8 +1,5 @@
 package com.ucla.jam.resources;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ucla.jam.chat.Chat;
 import com.ucla.jam.chat.ChatManager;
@@ -12,18 +9,15 @@ import com.ucla.jam.session.SessionInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RequiredArgsConstructor
 @RestController

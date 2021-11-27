@@ -1,13 +1,13 @@
 package com.ucla.jam.user;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import com.ucla.jam.util.Distance;
 import com.ucla.jam.util.Location;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 abstract class UserRepositoryContract {
 

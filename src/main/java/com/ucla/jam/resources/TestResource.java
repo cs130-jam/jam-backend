@@ -1,7 +1,5 @@
 package com.ucla.jam.resources;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
 import com.ucla.jam.session.SessionToken;
@@ -14,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -1,7 +1,6 @@
 package com.ucla.jam.chat.chatroom;
 
 import com.ucla.jam.util.jooq.JsonConverter;
-import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PACKAGE;
-import static lombok.AccessLevel.PRIVATE;
 
 @Value
 public class Chatroom {
