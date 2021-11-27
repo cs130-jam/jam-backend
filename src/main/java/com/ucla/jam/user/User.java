@@ -28,7 +28,7 @@ public class User {
         String lastName;
         String bio;
         Location location;
-        String pfpUrl;
+        @With String pfpUrl;
         List<MusicInterest> musicInterests;
         List<Instrument> instruments;
 

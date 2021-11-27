@@ -23,6 +23,7 @@ public class DbUserRepository implements UserRepository {
 
     @Override
     public void insert(User user) {
+        System.out.println(user.getProfile().getPfpUrl());
         context.insertInto(USERS)
                 .set(toRecord(user))
                 .onDuplicateKeyUpdate()

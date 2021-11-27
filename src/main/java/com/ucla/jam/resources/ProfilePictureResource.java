@@ -2,6 +2,9 @@ package com.ucla.jam.resources;
 
 import com.ucla.jam.session.SessionFromHeader;
 import com.ucla.jam.session.SessionInfo;
+import com.ucla.jam.user.UnknownUserException;
+import com.ucla.jam.user.User;
+import com.ucla.jam.user.UserManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +40,7 @@ public class ProfilePictureResource {
 
     @Value("${server.static.content.path}")
     private String staticContentPath;
+    private final UserManager userManager;
 
     @PostMapping(value = "/upload", consumes = MULTIPART_FORM_DATA_VALUE)
     public void uploadContent(@SessionFromHeader SessionInfo sessionInfo, @RequestPart MultipartFile image) {
@@ -45,6 +49,8 @@ public class ProfilePictureResource {
         }
         try {
             UUID userId = sessionInfo.getUserId();
+            User user = userManager.getUser(userId)
+                    .orElseThrow(UnknownUserException::new);
             String extension = ACCEPTED_FILETYPES.get(image.getContentType());
             for (File file : allFilesWithPathPrefix(userId.toString(), staticContentPath)) {
                 file.delete();
@@ -52,6 +58,8 @@ public class ProfilePictureResource {
 
             String filename = Paths.get(staticContentPath, userId.toString()) + "." + extension;
             image.transferTo(new File(filename));
+            log.info("updating to {}", "/static/" + userId + "." + extension);
+            userManager.updateUserProfile(user, user.getProfile().withPfpUrl("/static/" + userId + "." + extension));
             // sometimes MultipartFile is stored in a temp file, sometimes in memory. I hope that the temp file is
             // deleted automatically, because I can't get Spring to put it in the temp file for testing purposes :/
         } catch (IOException e) {
