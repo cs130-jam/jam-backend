@@ -55,7 +55,7 @@ with connection:
             uid = str(uuid.UUID(int=i))
             profile = {
                 "firstName": "User" + str(i + 1),
-                "lastName": "Test",
+                "lastName": "LastName",
                 "bio": "",
                 "location": {
                     "longitude": str(-118.4508667 + random.random() - 0.5),
@@ -65,7 +65,7 @@ with connection:
                 "musicInterests": [
                     {"id": artist["id"], "name": artist["name"], "path": "artists/" + artist["id"], "thumb": artist["thumb"]} for artist in artistSubset
                 ],
-                "instruments": np.random.choice(instruments, random.randint(1, 5)).tolist()}
+                "instruments": np.random.choice(instruments, random.randint(1, 5), replace=False).tolist()}
             preferences = {"maxDistance": {"value": 50.0, "units": "Miles"}, "wantedInstruments": []}
 
             cursor.execute(sqlUsers, (uid, json.dumps(profile), json.dumps(preferences)))
