@@ -63,7 +63,7 @@ with connection:
                 },
                 "pfpUrl": "",
                 "musicInterests": [
-                    {"name": artist["name"], "path": "artists/" + artist["id"]} for artist in artistSubset
+                    {"name": artist["name"], "path": "artists/" + artist["id"], "thumb": artist["thumb"]} for artist in artistSubset
                 ],
                 "instruments": np.random.choice(instruments, random.randint(1, 5)).tolist()}
             preferences = {"maxDistance": {"value": 50.0, "units": "Miles"}, "wantedInstruments": []}

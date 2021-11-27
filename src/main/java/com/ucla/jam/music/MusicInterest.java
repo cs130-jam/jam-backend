@@ -6,4 +6,5 @@ import lombok.Value;
 public class MusicInterest {
     String name;
     String path;
+    String thumb;
 }
