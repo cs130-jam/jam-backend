@@ -7,6 +7,10 @@ import com.ucla.jam.notifications.data.friendrequest.FriendRequestNotificationDa
 import com.ucla.jam.notifications.data.groupinvite.GroupInviteNotificationData;
 import com.ucla.jam.util.jooq.JsonConverter;
 
+/**
+ * Notification data DTO for communication with database.
+ * Implementing subclasses must add a @JsonSubType.Type in order to properly serialize and deserialize.
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = FriendRequestNotificationData.class, name = FriendRequestNotificationData.TYPE),
@@ -14,6 +18,11 @@ import com.ucla.jam.util.jooq.JsonConverter;
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public interface NotificationData {
+    /**
+     * Unique string identifying the kind of NotificationData
+     * This value must match the name specified in @JsonSubTypes.Type
+     * @return Notification data type
+     */
     String getType();
 
     class Converter extends JsonConverter<NotificationData> {}

@@ -17,6 +17,11 @@ public class FriendRequestNotificationListener implements FriendRequestListener 
     private final NotificationsRepository notificationsRepository;
     private final Clock clock;
 
+    /**
+     * Called when a friend request is sent from source user to target user.
+     * @param sourceId Source user UUID
+     * @param targetId Target user UUID
+     */
     @Override
     public void friendRequested(UUID sourceId, UUID targetId) {
         User sourceUser = userRepository.find(sourceId)

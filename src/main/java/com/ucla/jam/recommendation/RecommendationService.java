@@ -27,6 +27,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+/**
+ * Provides methods to query recommendation service in various ways.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class RecommendationService {
@@ -36,10 +39,22 @@ public class RecommendationService {
     private final DiscogsService discogsService;
     private final int mastersSampleSize;
 
+    /**
+     * Begin process of finding style of music user is interested in based on {@link User.Profile#musicInterests}.
+     * Once these have been found, data is sent to recommendation server to be inserted.
+     * This method is non-blocking.
+     * @param user User to insert
+     */
     public void triggerInsertUser(User user) {
         triggerInsertUser(user.getId(), user.getProfile());
     }
 
+    /**
+     * Calls {@link RecommendationService#triggerInsertUser(User)} if user music interests have changed.
+     * This method is non-blocking.
+     * @param oldUser User profile before update
+     * @param newProfile New user profile to update to
+     */
     public void updateUser(User oldUser, User.Profile newProfile) {
         Set<MusicInterest> oldInterests = Set.copyOf(oldUser.getProfile().getMusicInterests());
         Set<MusicInterest> newInterests = Set.copyOf(newProfile.getMusicInterests());
@@ -86,14 +101,32 @@ public class RecommendationService {
                 .subscribe(entity -> complete.complete(null));
     }
 
+    /**
+     * Mark that source user has seen the recommendation of target user.
+     * @param sourceUser Source user UUID
+     * @param targetUser Target user UUID
+     */
     public void markVisited(UUID sourceUser, UUID targetUser) {
         visitedRepository.markVisited(sourceUser, targetUser);
     }
 
+    /**
+     * Get list of user recommendations which given user has already seen
+     * @param userId User UUID
+     * @return List of user UUIDs
+     */
     public List<UUID> getVisited(UUID userId) {
         return visitedRepository.getVisited(userId);
     }
 
+    /**
+     * Get a recommendation for the given user.
+     * Given page handler must return an empty list if no valid recommendations are found,
+     * or return a list of length 1 of the user to recommend to the given user.
+     * @param user User UUID
+     * @param pageHandler Handler to find valid recommended users
+     * @return Future of recommendation user UUID
+     */
     public Future<UUID> getRecommendation(User user, PageHandler<UUID> pageHandler) {
         CompletableFuture<UUID> future = new CompletableFuture<>();
         ensureUser(user).thenAccept(success -> {

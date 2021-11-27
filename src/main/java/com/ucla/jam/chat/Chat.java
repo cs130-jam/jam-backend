@@ -7,6 +7,9 @@ import org.springframework.lang.Nullable;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Chat DTO for communication with database
+ */
 @Value
 public class Chat {
     @Nullable Integer id;

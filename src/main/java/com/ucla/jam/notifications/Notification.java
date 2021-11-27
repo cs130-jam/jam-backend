@@ -6,6 +6,9 @@ import lombok.Value;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Notification DTO for communication with database
+ */
 @Value
 public class Notification {
     UUID id;

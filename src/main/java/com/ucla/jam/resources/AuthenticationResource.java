@@ -10,8 +10,7 @@ import com.ucla.jam.user.authentication.ExistingUserException;
 import com.ucla.jam.user.authentication.InternalCredentials;
 import com.ucla.jam.user.authentication.InvalidCredentialsException;
 import com.ucla.jam.util.Location;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +18,27 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@RequiredArgsConstructor
 @RestController
 public class AuthenticationResource {
 
     private final AuthenticationManager authenticationManager;
     private final UserManager userManager;
+    private final String passwordSalt;
+
+    @java.beans.ConstructorProperties({"authenticationManager", "userManager", "passwordSalt"})
+    public AuthenticationResource(
+            AuthenticationManager authenticationManager,
+            UserManager userManager,
+            @Value("${bcrypt.salt}") String passwordSalt
+    ) {
+        this.authenticationManager = authenticationManager;
+        this.userManager = userManager;
+        this.passwordSalt = passwordSalt;
+    }
 
     @PostMapping(value = "internal/login", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public UserTokenResponse internalLogin(@RequestBody InternalUserInfo userInfo) {
-        return authenticationManager.loginUser(authenticationManager.internal(userInfo.getUsername(), userInfo.getPassword()))
+        return authenticationManager.loginUser(InternalCredentials.internal(userInfo.getUsername(), userInfo.getPassword(), passwordSalt))
                 .map(SessionToken::getToken)
                 .map(UserTokenResponse::new)
                 .orElseThrow(InvalidCredentialsException::new);
@@ -39,7 +49,7 @@ public class AuthenticationResource {
         if (authenticationManager.isUserExist(InternalCredentials.partialCredentials(signupInfo.username))) {
             throw new ExistingUserException();
         }
-        InternalCredentials credentials = authenticationManager.internal(signupInfo.getUsername(), signupInfo.getPassword());
+        InternalCredentials credentials = InternalCredentials.internal(signupInfo.getUsername(), signupInfo.getPassword(), passwordSalt);
         User newUser = userManager.addNewUser(signupInfo.toProfile());
         return new UserTokenResponse(authenticationManager.signupUser(newUser.getId(), credentials).getToken());
     }
@@ -52,13 +62,13 @@ public class AuthenticationResource {
         }
     }
 
-    @Value
+    @lombok.Value
     private static class InternalUserInfo {
         String username;
         String password;
     }
 
-    @Value
+    @lombok.Value
     private static class InternalUserSignupInfo {
         String username;
         String password;
@@ -82,7 +92,7 @@ public class AuthenticationResource {
         }
     }
 
-    @Value
+    @lombok.Value
     private static class UserTokenResponse {
         String token;
     }

@@ -1,6 +1,6 @@
 package com.ucla.jam.ws;
 
-import com.ucla.jam.UnknownTokenException;
+import com.ucla.jam.session.UnknownTokenException;
 import com.ucla.jam.session.SessionInfo;
 import com.ucla.jam.session.SessionToken;
 import com.ucla.jam.session.SessionTokenResolver;

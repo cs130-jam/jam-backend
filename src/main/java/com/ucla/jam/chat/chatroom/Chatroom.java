@@ -12,6 +12,9 @@ import java.util.UUID;
 
 import static lombok.AccessLevel.PACKAGE;
 
+/**
+ * Chatroom DTO for communication with database
+ */
 @Value
 public class Chatroom {
     @NonNull UUID id;

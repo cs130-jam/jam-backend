@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Handler for all credential types.
+ * Using the {@link Credentials#getKind()}, the relevant credentials handler is called
+ */
 @RequiredArgsConstructor
 public class AggregatedCredentialsRepository implements CredentialsRepository {
 

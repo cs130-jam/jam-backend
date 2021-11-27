@@ -10,6 +10,8 @@ public class Location {
     /**
      * Calculate distance between two points in latitude and longitude. Uses Haversine method as its base.
      * https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude
+     * @param other Location to calculate distance to
+     * @return Distance between this and other location
      */
     public Distance distance(Location other) {
 

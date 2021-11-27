@@ -29,6 +29,7 @@ public class DbInternalCredentialsRepository implements CredentialsRepository {
         InternalCredentials credentials = (InternalCredentials) genericCredentials;
         context.insertInto(INTERNAL_CREDENTIALS)
                 .set(toRecord(id, credentials))
+                .onDuplicateKeyIgnore()
                 .execute();
     }
 

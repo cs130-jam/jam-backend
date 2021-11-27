@@ -2,7 +2,6 @@ package com.ucla.jam.session;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ucla.jam.UnknownTokenException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -21,6 +20,10 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Handles resolution of session tokens in resource from http headers.
+ * Also handles creation of new signed JWT.
+ */
 public class SessionTokenResolver implements HandlerMethodArgumentResolver {
 
     public static final String SESSION_TOKEN_KEY = "session-token";
@@ -42,6 +45,11 @@ public class SessionTokenResolver implements HandlerMethodArgumentResolver {
         this.clock = clock;
     }
 
+    /**
+     * Get session info from session token.
+     * @param token Session token
+     * @return Empty optional if session token is invalid or unauthorized
+     */
     public Optional<SessionInfo> fromToken(SessionToken token) {
         try {
             return Optional.of(objectMapper.readValue(
@@ -58,6 +66,11 @@ public class SessionTokenResolver implements HandlerMethodArgumentResolver {
         }
     }
 
+    /**
+     * Convert session info to signed JWT.
+     * @param sessionInfo Session info to convert
+     * @return SessionToken with signed JWT
+     */
     @SneakyThrows(JsonProcessingException.class)
     public SessionToken toToken(SessionInfo sessionInfo) {
         return new SessionToken(Jwts.builder()

@@ -4,7 +4,6 @@ import io.netty.handler.ssl.SslContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,7 +18,10 @@ import java.util.List;
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Slf4j
+/**
+ * Provider for configured Discogs API web client.
+ * Must be a singleton in order to handle rate limiting properly.
+ */
 @RequiredArgsConstructor
 public class DiscogsWebClientProvider {
 
@@ -35,6 +37,12 @@ public class DiscogsWebClientProvider {
     private final int maxReqs = 60;
     private final Duration maxReqsTimespan = Duration.ofMinutes(2);
 
+    /**
+     * Retrieve a web client for communication with Discogs API preconfigured with relevant headers.
+     * If the Discogs API is being queried too often, this method will block until there is time for
+     * another request to not be rate limited.
+     * @return Configured web client
+     */
     @SneakyThrows
     public synchronized WebClient get() {
         Instant minuteAgo = clock.instant().minus(maxReqsTimespan);

@@ -8,6 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 public class ObjectMapperProvider {
+    /**
+     * Get a configured ObjectMapper instance.
+     * @return Object mapper instance
+     */
     public static ObjectMapper get() {
         return new ObjectMapper()
                 .registerModule(new JavaTimeModule())

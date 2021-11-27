@@ -7,6 +7,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Handler for all notification types.
+ * Using the type of the notification, this will trigger the relevant {@link NotificationHandler}.
+ */
 @RequiredArgsConstructor
 public class AggregatedNotificationHandler implements NotificationHandler {
 

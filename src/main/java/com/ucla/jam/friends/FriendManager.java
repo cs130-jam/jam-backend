@@ -8,6 +8,10 @@ import java.util.UUID;
 import static com.ucla.jam.friends.FriendManager.FriendResult.*;
 import static com.ucla.jam.friends.FriendManager.UnfriendResult.*;
 
+/**
+ * Handles sending and rejecting friend requests.
+ * Also handles accepting friend requests.
+ */
 @RequiredArgsConstructor
 public class FriendManager {
 
@@ -16,6 +20,11 @@ public class FriendManager {
     private final List<FriendRequestListener> friendRequestListeners;
     private final UUID userId;
 
+    /**
+     * Attempt to friend target user as {@link FriendManager#userId}
+     * @param targetId Target user UUID
+     * @return Result of the attempt to friend the target user
+     */
     public FriendResult tryFriend(UUID targetId) {
         if (targetId.equals(userId)) {
             throw new SameUserException();
@@ -36,6 +45,11 @@ public class FriendManager {
         return REQUESTED;
     }
 
+    /**
+     * Attempt to unfriend target user as {@link FriendManager#userId}
+     * @param targetId Target user UUID
+     * @return Result of the attempt to unfriend the target user
+     */
     public UnfriendResult tryUnfriend(UUID targetId) {
         if (friendRepository.getAll(userId).contains(targetId)) {
             friendRepository.unfriend(userId, targetId);
@@ -50,18 +64,34 @@ public class FriendManager {
         return NOT_FRIENDS_OR_REQUESTED;
     }
 
+    /**
+     * Cancel request for target user to be friends with {@link FriendManager#userId}
+     * @param targetId Target user UUID
+     */
     public void cancelRequest(UUID targetId) {
         friendRequestRepository.unrequest(userId, targetId);
     }
 
+    /**
+     * Get all users who are friends with {@link FriendManager#userId}
+     * @return List of UUIDs of user's friends
+     */
     public List<UUID> getFriends() {
         return friendRepository.getAll(userId);
     }
 
+    /**
+     * List users who have sent a friend request to {@link FriendManager#userId}
+     * @return List of UUIDs of users
+     */
     public List<UUID> getIncomingRequests() {
         return friendRequestRepository.requestsTo(userId);
     }
 
+    /**
+     * List users who have been sent a friend request from {@link FriendManager#userId}
+     * @return List of UUIDs of users
+     */
     public List<UUID> getOutgoingRequests() {
         return friendRequestRepository.requestsFrom(userId);
     }
@@ -80,6 +110,11 @@ public class FriendManager {
         private final FriendRequestRepository friendRequestRepository;
         private final List<FriendRequestListener> friendRequestListeners;
 
+        /**
+         * Instantiate a {@link FriendManager} for the given user
+         * @param userId User UUID
+         * @return New {@link FriendManager} object
+         */
         public FriendManager forUser(UUID userId) {
             return new FriendManager(friendRepository, friendRequestRepository, friendRequestListeners, userId);
         }

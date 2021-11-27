@@ -21,6 +21,12 @@ public class GroupInviteNotificationListener implements GroupInviteListener {
     private final NotificationsRepository notificationsRepository;
     private final Clock clock;
 
+    /**
+     * Triggered when the target user is invited to the given room by the source user
+     * @param sourceId Source user UUID
+     * @param targetId Target user UUID
+     * @param roomId Room UUID
+     */
     @Override
     public void invitedToGroup(UUID sourceId, UUID targetId, UUID roomId) {
         Chatroom room = chatroomRepository.get(roomId)

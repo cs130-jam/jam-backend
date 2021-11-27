@@ -8,7 +8,6 @@ import com.ucla.jam.resources.ArtistResource;
 import com.ucla.jam.util.pagination.Pagination.PaginatedRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
@@ -19,15 +18,23 @@ import java.util.concurrent.Future;
 import static com.ucla.jam.util.pagination.Pagination.accumulatingPaginatedRequest;
 import static java.util.stream.Collectors.toList;
 
-@Slf4j
+/**
+ * Provides methods to query Discogs API in various ways.
+ */
 @RequiredArgsConstructor
 public class DiscogsService {
 
     private static final String ARTIST_SEARCH_TYPE = "artist";
-    private static final String MASTER_SEARCHT_TYPE = "master";
+    private static final String MASTER_SEARCH_TYPE = "master";
     private final DiscogsWebClientProvider webClientProvider;
     private final int maxItemCount;
 
+    /**
+     * Search Discogs API for the given artist, querying the given page
+     * @param artist Artist name query
+     * @param page page index, at least one
+     * @return Future for search response
+     */
     public Future<ArtistResource.QueryResponse> artistSearch(String artist, int page) {
         CompletableFuture<ArtistResource.QueryResponse> future = new CompletableFuture<>();
         new SearchRequest(artist, ARTIST_SEARCH_TYPE)
@@ -44,14 +51,24 @@ public class DiscogsService {
         return future;
     }
 
+    /**
+     * {@link DiscogsService#artistSearch(String, int)} for the first page.
+     * @param artist Artist name query
+     * @return Future for search response
+     */
     public Future<ArtistResource.QueryResponse> artistSearch(String artist) {
         return artistSearch(artist, 1);
     }
 
+    /**
+     * Return all master urls for the artist with the given name, up to a maximum of {@link DiscogsService#maxItemCount}.
+     * @param artistName Exact artist name
+     * @return Future for list of master urls
+     */
     public Future<List<String>> artistMasterUrls(String artistName) {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
         accumulatingPaginatedRequest(
-                new SearchRequest(artistName, MASTER_SEARCHT_TYPE),
+                new SearchRequest(artistName, MASTER_SEARCH_TYPE),
                 maxItemCount,
                 new ResultHandler<>() {
                     @Override
@@ -71,6 +88,11 @@ public class DiscogsService {
         return future;
     }
 
+    /**
+     * Get master from Discogs APi with the given url
+     * @param masterUrl Url to master resource
+     * @return Future of master response
+     */
     public Future<MasterResourceResponse> getMaster(String masterUrl) {
         CompletableFuture<MasterResourceResponse> future = new CompletableFuture<>();
         webClientProvider.get()

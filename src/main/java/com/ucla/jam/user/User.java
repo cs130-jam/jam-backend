@@ -13,6 +13,9 @@ import lombok.With;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * User DTO for communication with database
+ */
 @Value
 public class User {
     @NonNull UUID id;

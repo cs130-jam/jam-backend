@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AuthenticationManagerUnitTest {
 
+    private final String salt = "asdasdaskjdgaksl";
     private final AuthenticationManager authenticationManager = new AuthenticationManager(
             new InMemoryInternalCredentialsRepository(),
             new SessionTokenResolver(
@@ -20,8 +21,7 @@ public class AuthenticationManagerUnitTest {
                     Duration.ofHours(6),
                     ObjectMapperProvider.get(),
                     Clock.systemUTC()
-            ),
-            "asjhdakjshdkajshd"
+            )
     );
 
     @Test
@@ -49,13 +49,13 @@ public class AuthenticationManagerUnitTest {
     @Test
     void failForEmptyUsername() {
         assertThrows(InvalidSignupException.class,
-                () -> authenticationManager.internal("", UUID.randomUUID().toString()));
+                () -> InternalCredentials.internal("", UUID.randomUUID().toString(), salt));
     }
 
     @Test
     void failForShortPassword() {
         assertThrows(InvalidSignupException.class,
-                () -> authenticationManager.internal(UUID.randomUUID().toString(), "small"));
+                () -> InternalCredentials.internal(UUID.randomUUID().toString(), "small", salt));
     }
 
     private InternalCredentials randomCredentials() {
