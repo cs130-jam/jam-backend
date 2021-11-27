@@ -23,7 +23,8 @@ with connection:
     with connection.cursor() as cursor:
         cursor.execute("CREATE DATABASE IF NOT EXISTS " + db_name)
         cursor.execute("USE " + db_name)
-        cursor.execute("CREATE TABLE IF NOT EXISTS user_interests (uid char(36) PRIMARY KEY, interests text)")
+        cursor.execute("DROP TABLE IF EXISTS user_interests")
+        cursor.execute("CREATE TABLE user_interests (uid char(36) PRIMARY KEY, interests text)")
 
         sql = "INSERT INTO user_interests (uid, interests) VALUES (%s, %s)"
         for i, subset in enumerate(subsets):
