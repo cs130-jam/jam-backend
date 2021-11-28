@@ -88,6 +88,20 @@ public class ChatManager {
     }
 
     /**
+     * Remove given chat room as given user
+     * @param roomId Chat room UUID
+     * @param userId User UUID
+     */
+    public void removeChatroom(UUID roomId, UUID userId) {
+        Chatroom chatroom = getChatroomIfMember(userId, roomId);
+        if (chatroom.getInfo() == null || !chatroom.getInfo().getAdmin().equals(userId)) {
+            throw new NotAdminException();
+        }
+        chatroom.getMembers().forEach(member -> chatroomRepository.removeMember(roomId, member));
+        chatroomRepository.remove(roomId);
+    }
+
+    /**
      * Insert chat room, or update chat room with same id.
      * @param chatroom Chat room to insert, {@link Chatroom#members} field will be ignored and may be empty
      */

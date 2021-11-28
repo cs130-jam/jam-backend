@@ -54,6 +54,13 @@ public class DbChatroomRepository implements ChatroomRepository {
     }
 
     @Override
+    public void remove(UUID roomId) {
+        context.deleteFrom(CHATROOMS)
+                .where(CHATROOMS.ID.eq(roomId))
+                .execute();
+    }
+
+    @Override
     public void insert(Chatroom chatroom) {
         context.insertInto(CHATROOMS)
                 .set(toRecord(chatroom))

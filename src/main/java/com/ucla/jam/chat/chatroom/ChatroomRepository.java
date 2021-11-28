@@ -21,6 +21,13 @@ public interface ChatroomRepository {
     Collection<Chatroom> getAll(UUID userId);
 
     /**
+     * Remove given chat room.
+     * Does nothing if chat room does not eixst.
+     * @param roomId Chat room UUID
+     */
+    void remove(UUID roomId);
+
+    /**
      * Insert chat room, or update chat room with same {@link Chatroom#id}
      * @param chatroom Chat room to insert, {@link Chatroom#members} field will be ignored and may be empty
      */

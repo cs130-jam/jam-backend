@@ -36,6 +36,12 @@ public class ChatroomResource {
         return chatManager.getChatroomIfMember(sessionInfo.getUserId(), roomId);
     }
 
+    @DeleteMapping(value = "/chatroom/{roomId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteChatroom(@PathVariable UUID roomId, @SessionFromHeader SessionInfo sessionInfo) {
+        chatManager.removeChatroom(roomId, sessionInfo.getUserId());
+    }
+
     @PutMapping(value = "/chatroom/{roomId}/info", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateInfo(@PathVariable UUID roomId, @RequestBody ChatroomUpdateBody update, @SessionFromHeader SessionInfo sessionInfo) {
