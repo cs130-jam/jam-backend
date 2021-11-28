@@ -56,7 +56,7 @@ with connection:
             profile = {
                 "firstName": "User" + str(i + 1),
                 "lastName": "LastName",
-                "bio": "",
+                "bio": "What a fantastic bio I've written, this is informative, interesting, and relatable!",
                 "location": {
                     "longitude": str(-118.4508667 + random.random() - 0.5),
                     "latitude": str(34.0687462 + random.random() - 0.5)

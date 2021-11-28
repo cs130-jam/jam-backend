@@ -18,6 +18,7 @@ public class DbFriendRequestRepository implements FriendRequestRepository {
     public void request(UUID sourceUser, UUID targetUser) {
         context.insertInto(FRIEND_REQUESTS)
                 .set(toRecord(sourceUser, targetUser))
+                .onDuplicateKeyIgnore()
                 .execute();
     }
 

@@ -7,6 +7,7 @@ public interface FriendRequestRepository {
 
     /**
      * Request target user to be friends with source user.
+     * Does nothing if request already exists.
      * @param sourceUser Source user UUID
      * @param targetUser Target user UUID
      */
@@ -14,6 +15,7 @@ public interface FriendRequestRepository {
 
     /**
      * Cancel request for target user to be friends with source user.
+     * Does nothing if request does not exist.
      * @param sourceUser Source user UUID
      * @param targetUser Target user UUID
      */

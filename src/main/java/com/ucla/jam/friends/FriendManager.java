@@ -40,8 +40,10 @@ public class FriendManager {
             return ACCEPTED;
         }
 
-        friendRequestListeners.forEach(listener -> listener.friendRequested(userId, targetId));
-        friendRequestRepository.request(userId, targetId);
+        if (!friendRequestRepository.isRequested(userId, targetId)) {
+            friendRequestListeners.forEach(listener -> listener.friendRequested(userId, targetId));
+            friendRequestRepository.request(userId, targetId);
+        }
         return REQUESTED;
     }
 
