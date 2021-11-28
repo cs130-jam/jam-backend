@@ -105,7 +105,7 @@ public class RecommendationResource {
             } else {
                 return user.getPreferences().getWantedInstruments()
                         .stream()
-                        .anyMatch(inst -> other.getPreferences().getWantedInstruments().contains(inst));
+                        .anyMatch(inst -> other.getProfile().getInstruments().contains(inst));
             }
         }
 
